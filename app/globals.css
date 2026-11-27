@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  .dark {
+    color-scheme: dark;
+  }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+  body {
+    @apply bg-white text-ink-900 antialiased dark:bg-ink-950 dark:text-ink-100;
+    font-feature-settings: "ss01", "cv11";
+  }
+  ::selection {
+    @apply bg-pass-400/30 text-ink-950 dark:text-white;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+  }
+  .card {
+    @apply rounded-2xl border border-ink-200/80 bg-white/70 backdrop-blur-sm transition-colors dark:border-ink-800 dark:bg-ink-900/60;
+  }
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-0.5 hover:border-pass-500/40 hover:shadow-[0_8px_40px_-12px_rgba(16,185,129,0.25)];
+  }
+  .chip {
+    @apply inline-flex items-center rounded-md border border-ink-200 bg-ink-50 px-2 py-0.5 font-mono text-[11px] font-medium text-ink-600 dark:border-ink-700 dark:bg-ink-850 dark:text-ink-300;
+  }
+  .kicker {
+    @apply font-mono text-xs font-medium uppercase tracking-[0.18em] text-pass-600 dark:text-pass-400;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pass-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-ink-950;
+  }
+  .btn-primary {
+    @apply btn bg-ink-950 text-white hover:bg-ink-800 dark:bg-pass-400 dark:text-ink-950 dark:hover:bg-pass-300;
+  }
+  .btn-ghost {
+    @apply btn border border-ink-200 text-ink-700 hover:border-ink-400 hover:text-ink-950 dark:border-ink-700 dark:text-ink-200 dark:hover:border-ink-500 dark:hover:text-white;
+  }
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(120, 130, 140, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(120, 130, 140, 0.08) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

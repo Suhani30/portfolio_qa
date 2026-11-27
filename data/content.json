@@ -1,0 +1,545 @@
+{
+  "meta": {
+    "title": "Habiba Akter — SQA Engineer",
+    "description": "Habiba Akter is a software quality assurance engineer who tests ERP, HR, AI and game products across UI, API and load layers."
+  },
+  "profile": {
+    "name": "Habiba Akter",
+    "role": "SQA Engineer",
+    "location": "Bangladesh",
+    "availability": "Open to QA & SDET roles",
+    "tagline": "I break software on purpose, so your users never have to.",
+    "intro": "A quality engineer who tests across the UI, API and load layers. I have shipped ERP suites, an HR platform, AI products and a UNICEF-backed 3D game, and I find the defect before the customer does.",
+    "email": "haakter.30@gmail.com",
+    "phone": "+880 1777 979052",
+    "linkedin": "https://www.linkedin.com/in/habiba-akter-30a90a194/",
+    "github": "https://github.com/Suhani30",
+    "resumeUrl": "",
+    "terminalCommand": "qa run --suite=release --env=staging",
+    "terminalLines": [
+      "Functional & regression · Selenium, Cypress",
+      "API contracts & status codes · Postman, Newman",
+      "Load profile at peak traffic · JMeter",
+      "BDD acceptance scenarios · Cucumber",
+      "Mobile + web builds · UI/UX sign-off"
+    ]
+  },
+  "stats": [
+    {
+      "value": "4+",
+      "label": "Years in software QA"
+    },
+    {
+      "value": "6",
+      "label": "Products shipped to users"
+    },
+    {
+      "value": "3",
+      "label": "Test layers: UI · API · Load"
+    },
+    {
+      "value": "5",
+      "label": "Domains: ERP, HR, AI, PropTech, Games"
+    }
+  ],
+  "about": {
+    "heading": "Quality is a habit I practise from requirement to release.",
+    "paragraphs": [
+      "I work across the whole testing lifecycle. I read requirements critically, turn acceptance criteria into traceable test plans, and then test the product the way real users will. That means manual, automated, API and performance testing, and each one has its own job in the release.",
+      "My day-to-day toolkit is Selenium, Cypress, JUnit, Postman and JMeter. I script in Java, Python and JavaScript, and I am comfortable inside Agile sprints, Jenkins pipelines and Jira workflows.",
+      "Developers like working with me because my bug reports are clear, reproducible and prioritised, and because I stay calm when a release is close."
+    ],
+    "highlights": [
+      {
+        "title": "Shift-left mindset",
+        "description": "I question requirements and acceptance criteria before any code is written."
+      },
+      {
+        "title": "Full-stack coverage",
+        "description": "I test the UI, the APIs, the data integrity behind them and how the system behaves under load."
+      },
+      {
+        "title": "Automation-ready",
+        "description": "I spot stable, repeatable flows and turn them into scripts that run every time."
+      },
+      {
+        "title": "Clear defect trails",
+        "description": "Each bug I file has steps, evidence, severity and the requirement it breaks."
+      }
+    ]
+  },
+  "projects": [
+    {
+      "id": "peopledesk",
+      "title": "PeopleDesk",
+      "category": "HRM · Web + Mobile",
+      "organization": "iBOS Limited",
+      "summary": "An HR platform on web and mobile. It covers employee records, attendance, leave and payroll, with workflows configured for each client.",
+      "challenge": "Every client ran its own configuration, so the same leave or payroll rule could behave differently from one tenant to the next.",
+      "approach": "I mapped test scenarios to each client's configuration, checked payroll and attendance calculations end to end, and kept a regression suite running across web and mobile builds.",
+      "coverage": [
+        "Payroll & leave rules",
+        "Role-based access",
+        "Web ↔ mobile parity",
+        "API data integrity"
+      ],
+      "tags": [
+        "Functional",
+        "Regression",
+        "API",
+        "Mobile"
+      ],
+      "link": "",
+      "featured": true
+    },
+    {
+      "id": "managerium",
+      "title": "Managerium ERP",
+      "category": "Enterprise ERP",
+      "organization": "iBOS Limited",
+      "summary": "A single ERP that brings finance, HR, inventory, sales, procurement and admin into one system.",
+      "challenge": "The modules share data, so a change in procurement can quietly break inventory or finance further down the line.",
+      "approach": "I wrote integration test flows across module boundaries, checked API responses and status codes, and ran load tests on the heaviest transactional endpoints.",
+      "coverage": [
+        "Cross-module integration",
+        "Load & performance",
+        "Status code contracts",
+        "Report accuracy"
+      ],
+      "tags": [
+        "Integration",
+        "JMeter",
+        "Postman",
+        "ERP"
+      ],
+      "link": "",
+      "featured": true
+    },
+    {
+      "id": "meena-game-2",
+      "title": "Meena Game 2",
+      "category": "3D Game · Mobile + Web",
+      "organization": "Riseup Labs × UNICEF",
+      "summary": "A full 3D game built around Meena, UNICEF's much-loved South Asian cartoon character. It ships on mobile and web.",
+      "challenge": "A young audience on a wide range of devices meant gameplay, performance and UI had to work on low-end hardware.",
+      "approach": "I tested gameplay flows, device-specific performance and UI/UX on mobile and web builds, and fed clear, reproducible defects back into each sprint.",
+      "coverage": [
+        "Gameplay functionality",
+        "Device performance",
+        "UI/UX consistency",
+        "Cross-platform builds"
+      ],
+      "tags": [
+        "Game QA",
+        "Mobile",
+        "Performance",
+        "UX"
+      ],
+      "link": "",
+      "featured": true
+    },
+    {
+      "id": "commplify",
+      "title": "Commplify",
+      "category": "AI Voice Agent",
+      "organization": "Riseup Labs",
+      "summary": "A virtual voice agent driven by AI that automates customer conversations.",
+      "challenge": "",
+      "approach": "I validated conversation flows, the APIs behind them and how the agent responded to edge-case input.",
+      "coverage": [],
+      "tags": [
+        "AI",
+        "API",
+        "Functional"
+      ],
+      "link": "",
+      "featured": false
+    },
+    {
+      "id": "cloud-couture",
+      "title": "Cloud Couture",
+      "category": "AI Fashion Platform",
+      "organization": "Riseup Labs",
+      "summary": "An AI design studio that lets garment designers create new pieces and connect straight to suppliers.",
+      "challenge": "",
+      "approach": "I tested the designer-to-supplier workflow end to end, including generation, listings and the handoffs between them.",
+      "coverage": [],
+      "tags": [
+        "AI",
+        "E2E",
+        "Workflow"
+      ],
+      "link": "",
+      "featured": false
+    },
+    {
+      "id": "wefi",
+      "title": "WeFi",
+      "category": "PropTech",
+      "organization": "Riseup Labs",
+      "summary": "One platform for listing, finding and renting property.",
+      "challenge": "",
+      "approach": "I covered the listing and rental journeys, search and filtering, and the data consistency behind each listing.",
+      "coverage": [],
+      "tags": [
+        "Functional",
+        "Regression"
+      ],
+      "link": "",
+      "featured": false
+    },
+    {
+      "id": "newman-api",
+      "title": "User API Testing · Newman",
+      "category": "Automation Lab",
+      "organization": "Open source",
+      "summary": "A Postman collection that runs headless through Newman and produces readable HTML reports for API regression.",
+      "challenge": "",
+      "approach": "",
+      "coverage": [],
+      "tags": [
+        "Postman",
+        "Newman",
+        "API"
+      ],
+      "link": "https://github.com/Suhani30",
+      "featured": false
+    },
+    {
+      "id": "orangehrm",
+      "title": "OrangeHRM Automation",
+      "category": "Automation Lab",
+      "organization": "Open source",
+      "summary": "UI automation for the OrangeHRM demo, built around a page-object structure so the suite stays maintainable.",
+      "challenge": "",
+      "approach": "",
+      "coverage": [],
+      "tags": [
+        "Selenium",
+        "Java",
+        "POM"
+      ],
+      "link": "https://github.com/Suhani30",
+      "featured": false
+    },
+    {
+      "id": "cucumber",
+      "title": "BDD with Cucumber",
+      "category": "Automation Lab",
+      "organization": "Open source",
+      "summary": "Acceptance scenarios in Gherkin, backed by step definitions that both business and engineering can read.",
+      "challenge": "",
+      "approach": "",
+      "coverage": [],
+      "tags": [
+        "Cucumber",
+        "Gherkin",
+        "BDD"
+      ],
+      "link": "https://github.com/Suhani30",
+      "featured": false
+    },
+    {
+      "id": "jmeter",
+      "title": "API Load Testing · JMeter",
+      "category": "Automation Lab",
+      "organization": "Open source",
+      "summary": "Load and stress test plans that profile how APIs respond under rising concurrent traffic.",
+      "challenge": "",
+      "approach": "",
+      "coverage": [],
+      "tags": [
+        "JMeter",
+        "Performance"
+      ],
+      "link": "https://github.com/Suhani30",
+      "featured": false
+    },
+    {
+      "id": "junit",
+      "title": "Automation with JUnit",
+      "category": "Automation Lab",
+      "organization": "Open source",
+      "summary": "A structured JUnit suite that shows assertions, test lifecycle hooks and readable test design.",
+      "challenge": "",
+      "approach": "",
+      "coverage": [],
+      "tags": [
+        "JUnit",
+        "Java"
+      ],
+      "link": "https://github.com/Suhani30",
+      "featured": false
+    }
+  ],
+  "experience": [
+    {
+      "id": "riseup",
+      "company": "Riseup Labs",
+      "role": "SQA Engineer",
+      "start": "May 2024",
+      "end": "Present",
+      "location": "Dhaka, BD",
+      "summary": "I own quality for ERP modules, AI products and games on mobile and web, and I also join Sands Corporation as part of an on-demand team.",
+      "achievements": [
+        "Write test plans, scenarios and cases traced to each requirement and its acceptance criteria",
+        "Run functional, regression and integration cycles across several ERP modules",
+        "Check API responses, status codes and data integrity, and load-test critical endpoints",
+        "Test games on mobile and web for gameplay, performance and UI/UX",
+        "Mark stable flows as ready for automation and maintain every test artefact and report"
+      ],
+      "tags": [
+        "ERP",
+        "API",
+        "Load",
+        "Game QA",
+        "Agile"
+      ]
+    },
+    {
+      "id": "ibos",
+      "company": "iBOS Limited",
+      "role": "Jr. Software QA Engineer",
+      "start": "Sep 2022",
+      "end": "Apr 2024",
+      "location": "Dhaka, BD",
+      "summary": "End-to-end quality assurance for HR and ERP products used by client organisations.",
+      "achievements": [
+        "Designed test cases and plans from project requirements for HR and ERP releases",
+        "Wrote automation scripts that cut repetitive regression effort",
+        "Ran API and load tests to confirm the system held up before each release",
+        "Logged defects in the tracker with clear reproduction steps for developers",
+        "Shared findings in weekly SQA reviews to improve how the team worked"
+      ],
+      "tags": [
+        "HRM",
+        "ERP",
+        "Automation",
+        "JMeter"
+      ]
+    },
+    {
+      "id": "btv",
+      "company": "Bangladesh Television, Chittagong Centre",
+      "role": "Sub Assistant Engineer",
+      "start": "Apr 2021",
+      "end": "Aug 2022",
+      "location": "Chittagong, BD",
+      "summary": "Kept computer systems maintained and gathered and analysed operational information.",
+      "achievements": [],
+      "tags": [
+        "Systems",
+        "Analysis"
+      ]
+    },
+    {
+      "id": "gaotek",
+      "company": "GAO Tek Inc.",
+      "role": "Software Development Intern",
+      "start": "Dec 2020",
+      "end": "Feb 2021",
+      "location": "Remote",
+      "summary": "Published technical content in WordPress and kept application data organised.",
+      "achievements": [
+        "Wrote and published technical posts about software apps",
+        "Audited application data files for consistency",
+        "Onboarded and mentored new interns"
+      ],
+      "tags": [
+        "WordPress",
+        "Content",
+        "Data"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "automation",
+      "group": "Test Automation",
+      "description": "UI and BDD suites that run the same way every time.",
+      "items": [
+        {
+          "name": "Selenium WebDriver",
+          "level": 3
+        },
+        {
+          "name": "Cypress",
+          "level": 3
+        },
+        {
+          "name": "JUnit / TestNG",
+          "level": 3
+        },
+        {
+          "name": "Cucumber (BDD)",
+          "level": 2
+        },
+        {
+          "name": "Appium",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "group": "API & Performance",
+      "description": "Contracts, payloads and behaviour under load.",
+      "items": [
+        {
+          "name": "Postman",
+          "level": 3
+        },
+        {
+          "name": "Newman",
+          "level": 3
+        },
+        {
+          "name": "JMeter",
+          "level": 3
+        },
+        {
+          "name": "Rest Assured",
+          "level": 2
+        }
+      ]
+    },
+    {
+      "id": "process",
+      "group": "QA Process",
+      "description": "The practice that holds the tooling together.",
+      "items": [
+        {
+          "name": "Manual & exploratory testing",
+          "level": 3
+        },
+        {
+          "name": "Test plans & case design",
+          "level": 3
+        },
+        {
+          "name": "SDLC / STLC",
+          "level": 3
+        },
+        {
+          "name": "Agile / Scrum",
+          "level": 3
+        },
+        {
+          "name": "Defect lifecycle · Jira",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "engineering",
+      "group": "Code & Tooling",
+      "description": "Enough engineering to script, debug and integrate.",
+      "items": [
+        {
+          "name": "Java",
+          "level": 2
+        },
+        {
+          "name": "JavaScript",
+          "level": 2
+        },
+        {
+          "name": "Python",
+          "level": 2
+        },
+        {
+          "name": "MySQL",
+          "level": 2
+        },
+        {
+          "name": "Git",
+          "level": 3
+        },
+        {
+          "name": "Jenkins CI/CD",
+          "level": 2
+        }
+      ]
+    }
+  ],
+  "softSkills": [
+    "Detail-oriented",
+    "Clear communicator",
+    "Calm under pressure",
+    "Fast learner",
+    "End-user empathy",
+    "Self-driven"
+  ],
+  "education": [
+    {
+      "id": "bsc",
+      "degree": "BSc in Computer Science & Engineering",
+      "institution": "The International University of Scholars",
+      "period": "2017 – 2020"
+    },
+    {
+      "id": "hsc",
+      "degree": "Higher Secondary Certificate",
+      "institution": "Rampura Ekramunnesa Degree College",
+      "period": "2011 – 2013"
+    }
+  ],
+  "training": [
+    {
+      "id": "sdet",
+      "title": "Full Stack SDET",
+      "provider": "Road to SDET",
+      "period": "Mar – Jun 2022",
+      "description": "An intensive programme covering the whole SDET toolchain, from manual basics to CI-integrated automation.",
+      "topics": [
+        "Rest Assured",
+        "Cypress",
+        "Appium",
+        "Cucumber",
+        "Robot Framework",
+        "Mocha/Chai",
+        "Jenkins"
+      ]
+    },
+    {
+      "id": "ibos-training",
+      "title": "SQA & Automation Training",
+      "provider": "iBOS Limited",
+      "period": "Dec 2022 – Jan 2023",
+      "description": "Company-wide training in API, performance, web and mobile automation.",
+      "topics": [
+        "Postman",
+        "Newman",
+        "JMeter",
+        "Selenium",
+        "TestNG",
+        "Appium"
+      ]
+    },
+    {
+      "id": "udemy",
+      "title": "Introduction to Software Testing",
+      "provider": "Udemy",
+      "period": "",
+      "description": "Foundations of the QA discipline: the roles, responsibilities and career path.",
+      "topics": [
+        "QA fundamentals",
+        "Career path"
+      ]
+    }
+  ],
+  "customSections": [],
+  "contact": {
+    "heading": "Need someone to guard your next release?",
+    "message": "I am open to QA engineer and SDET roles where quality is owned by the whole team, not added at the end. Send me a message and I will reply within a day.",
+    "cta": "Start a conversation"
+  },
+  "visibility": {
+    "about": true,
+    "projects": true,
+    "experience": true,
+    "skills": true,
+    "credentials": true,
+    "contact": true
+  }
+}
