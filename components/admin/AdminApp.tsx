@@ -329,12 +329,13 @@ export default function AdminApp() {
 
           {section ? (
             <div key={section.id} className="animate-fade-up space-y-8">
-              {section.fields.map((f) => (
-                <div key={f.key} className={f.type === "group" ? "card p-6" : ""}>
+              {section.fields.map((f, fi) => (
+                <div key={`${f.key}-${fi}`} className={f.type === "group" ? "card p-6" : ""}>
                   {f.type === "group" && section.fields.length > 1 && (
                     <h2 className="mb-5 text-sm font-semibold uppercase tracking-wider text-ink-500">{f.label}</h2>
                   )}
                   <FieldGrid
+                    depth={1}
                     fields={f.type === "group" ? f.fields : [f]}
                     value={(f.type === "group" ? (content as unknown as Record<string, Record<string, unknown>>)[f.key] : (content as unknown as Record<string, unknown>)) ?? {}}
                     onChange={(v) =>

@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useMuted, useSfx } from "./sfx";
+import { useGameSettings } from "./settings";
 
 /** Number of bug hiding spots placed across the page (see <Bug slot={…} />). */
 export const MAX_BUGS = 18;
@@ -44,7 +45,8 @@ export function BugHuntProvider({
 }) {
   const [state, setState] = useState<State>(initial);
   const [bugIds, setBugIds] = useState<string[]>([]);
-  const [muted, setMuted] = useMuted();
+  const settings = useGameSettings();
+  const [muted, setMuted] = useMuted(!settings.sound);
   const [bestTime, setBestTime] = useState<number | null>(null);
   const play = useSfx(muted);
   const count = Math.max(1, Math.min(MAX_BUGS, Math.round(bugCount) || 1));

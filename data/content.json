@@ -22,6 +22,14 @@
       "Load profile at peak traffic · JMeter",
       "BDD acceptance scenarios · Cucumber",
       "Mobile + web builds · UI/UX sign-off"
+    ],
+    "rotatingWords": [
+      "REST APIs & contracts",
+      "ERP workflows",
+      "mobile games",
+      "load at peak traffic",
+      "AI voice agents",
+      "regression suites"
     ]
   },
   "stats": [
@@ -543,10 +551,34 @@
     "contact": true
   },
   "game": {
+    "sound": true,
+    "coinExplorer": true,
+    "coinsPerIsland": 5,
+    "coinValue": 1,
+    "islandBonus": 10,
+    "showScenery": true,
+    "showBot": true,
+    "botName": "Testy",
+    "arrivalMessages": true,
+    "achievements": true,
+    "islandNames": {
+      "top": "Launch Bay",
+      "about": "Origin Isle",
+      "work": "Case Study Cove",
+      "experience": "Timeline Reef",
+      "skills": "Toolchain Atoll",
+      "credentials": "Scholar Key",
+      "contact": "Contact Cape"
+    },
+    "finishTitle": "Full coverage achieved!",
+    "finishMessage": "You explored every island and collected every coin. That's the kind of thoroughness I bring to every release.",
     "bugHunt": true,
     "bugCount": 9,
-    "islandQuest": true,
-    "coinsPerIsland": 5,
-    "islandBonus": 10
+    "bugButtonLabel": "Bug Hunt",
+    "bugIntro": "Release day is here and bugs have crept into this portfolio. Scroll through every section, find them and squash each one before it reaches production.",
+    "bugHints": true,
+    "rankPrincipal": 45,
+    "rankSenior": 90,
+    "rankEngineer": 180
   }
 }

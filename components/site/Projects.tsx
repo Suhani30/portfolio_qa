@@ -7,7 +7,7 @@ import Bug from "@/components/game/Bug";
 function FeaturedCard({ p, i }: { p: Project; i: number }) {
   return (
     <Reveal as="article" delay={i * 60}>
-      <div className="card card-hover group relative overflow-hidden">
+      <div className="tilt card card-hover group relative overflow-hidden">
         <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-pass-500/0 blur-3xl transition-colors duration-700 group-hover:bg-pass-500/10" />
         {i === 1 && <Bug id="project-case" slot={3} className="bottom-5 right-5" />}
         {i === 0 && <Bug id="project-case-a" slot={11} className="right-5 top-5" />}

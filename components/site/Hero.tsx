@@ -1,5 +1,7 @@
 import type { Profile, Stat } from "@/lib/types";
 import Terminal from "./Terminal";
+import TypeRotator from "./TypeRotator";
+import CountUp from "./CountUp";
 import Bug from "@/components/game/Bug";
 import { ArrowRight, Github, Linkedin, Pin } from "./Icons";
 
@@ -19,6 +21,8 @@ export default function Hero({ profile, stats }: { profile: Profile; stats: Stat
     <section id="top" className="relative overflow-hidden pt-28 sm:pt-36">
       <div className="bg-grid pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,black,transparent)]" />
       <div className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-pass-500/10 blur-3xl dark:bg-pass-500/[0.08]" />
+      <div className="pointer-events-none absolute left-[8%] top-40 h-72 w-72 animate-aurora rounded-full bg-teal-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute right-[6%] top-24 h-80 w-80 animate-aurora rounded-full bg-amber-400/[0.07] blur-3xl [animation-delay:-6s]" />
 
       <div className="container-x relative">
         <Bug id="hero-heading" slot={9} className="right-4 top-0 lg:left-[44%] lg:right-auto" />
@@ -54,6 +58,13 @@ export default function Hero({ profile, stats }: { profile: Profile; stats: Stat
             <p className="mt-6 max-w-xl animate-fade-up text-pretty text-lg leading-relaxed text-ink-600 [animation-delay:220ms] dark:text-ink-400">
               {profile.intro}
             </p>
+
+            {!!profile.rotatingWords?.length && (
+              <p className="mt-5 animate-fade-up font-mono text-sm text-ink-500 [animation-delay:260ms] dark:text-ink-400">
+                <span className="text-ink-400 dark:text-ink-600">$</span> currently testing:{" "}
+                <TypeRotator words={profile.rotatingWords} />
+              </p>
+            )}
 
             <div className="mt-9 flex animate-fade-up flex-wrap items-center gap-3 [animation-delay:300ms]">
               <a href="#work" className="btn-primary group">
@@ -99,7 +110,9 @@ export default function Hero({ profile, stats }: { profile: Profile; stats: Stat
                 className="group relative flex flex-col-reverse bg-white p-6 transition-colors hover:bg-ink-50 dark:bg-ink-950 dark:hover:bg-ink-900"
               >
                 <dt className="mt-1 text-sm text-ink-500 dark:text-ink-400">{s.label}</dt>
-                <dd className="text-3xl font-semibold tracking-tight text-ink-950 sm:text-4xl dark:text-white">{s.value}</dd>
+                <dd className="text-3xl font-semibold tracking-tight text-ink-950 sm:text-4xl dark:text-white">
+                  <CountUp value={s.value} />
+                </dd>
                 <span className="absolute inset-x-6 bottom-0 h-px origin-left scale-x-0 bg-pass-500 transition-transform duration-500 group-hover:scale-x-100" />
               </div>
             ))}

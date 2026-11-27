@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useBugHunt } from "./BugHuntProvider";
 import { fmtTime as fmt } from "./sfx";
+import { useGameSettings } from "./settings";
 
-
-function rank(sec: number) {
-  if (sec <= 45) return { title: "Principal QA", note: "Nothing escapes you. Zero defects in production." };
-  if (sec <= 90) return { title: "Senior QA Engineer", note: "Fast, thorough and ready for release day." };
-  if (sec <= 180) return { title: "QA Engineer", note: "Solid coverage, every bug in the tracker." };
+function rank(sec: number, t: { principal: number; senior: number; engineer: number }) {
+  if (sec <= t.principal) return { title: "Principal QA", note: "Nothing escapes you. Zero defects in production." };
+  if (sec <= t.senior) return { title: "Senior QA Engineer", note: "Fast, thorough and ready for release day." };
+  if (sec <= t.engineer) return { title: "QA Engineer", note: "Solid coverage, every bug in the tracker." };
   return { title: "QA Intern", note: "You found them all, and that's what counts." };
 }
 
@@ -58,6 +58,8 @@ export default function BugHuntHUD() {
   const [now, setNow] = useState(() => Date.now());
   const [dismissedWin, setDismissedWin] = useState(false);
   const [hintMsg, setHintMsg] = useState("");
+  const [introOpen, setIntroOpen] = useState(false);
+  const g = useGameSettings();
 
   useEffect(() => {
     if (!active || finishedAt) return;
@@ -94,10 +96,79 @@ export default function BugHuntHUD() {
     setTimeout(() => setHintMsg(""), 2200);
   };
 
-  if (!active) return null;
+  /* ---------- idle: its own button ---------- */
+  if (!active) {
+    return (
+      <>
+        <button
+          onClick={() => setIntroOpen(true)}
+          className="group fixed bottom-5 right-5 z-[60] flex items-center gap-2.5 rounded-full border border-red-400/30 bg-white/90 py-1.5 pl-1.5 pr-4 text-sm shadow-xl shadow-ink-900/10 backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-red-400/60 dark:bg-ink-900/90 dark:shadow-black/40"
+        >
+          <span className="relative grid h-9 w-9 place-items-center rounded-full bg-red-500/10 text-red-500 transition group-hover:rotate-12">
+            <BugGlyph className="h-5 w-5" />
+            <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 font-mono text-[9px] font-bold text-white">{total}</span>
+          </span>
+          <span className="text-left leading-tight">
+            <span className="block font-medium text-ink-900 dark:text-white">{g.bugButtonLabel || "Bug Hunt"}</span>
+            <span className="hidden font-mono text-[10px] text-ink-500 sm:block">{total} bugs hiding · play</span>
+          </span>
+        </button>
+
+        {introOpen && (
+          <div className="fixed inset-0 z-[80] grid place-items-center bg-ink-950/60 p-5 backdrop-blur-sm" onClick={() => setIntroOpen(false)}>
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="bh-title"
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md animate-pop rounded-2xl border border-ink-200 bg-white p-7 shadow-2xl dark:border-ink-800 dark:bg-ink-900"
+            >
+              <div className="flex items-center gap-3">
+                <span className="grid h-11 w-11 place-items-center rounded-xl bg-red-500/10 text-red-500">
+                  <BugGlyph className="h-6 w-6" />
+                </span>
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-widest text-pass-600 dark:text-pass-400">mini-game · {total} bugs</p>
+                  <h2 id="bh-title" className="text-xl font-semibold tracking-tight">
+                    {g.bugButtonLabel || "Bug Hunt"}
+                  </h2>
+                </div>
+              </div>
+              <p className="mt-5 text-sm leading-relaxed text-ink-600 dark:text-ink-300">{g.bugIntro}</p>
+              <ul className="mt-4 space-y-1.5 font-mono text-xs text-ink-500">
+                <li>▸ Click or tap a bug to squash it</li>
+                {g.bugHints && <li>▸ Stuck? Use Hint to jump to the nearest one</li>}
+                <li>▸ Your time decides your QA rank</li>
+              </ul>
+              {bestTime !== null && (
+                <p className="mt-4 text-xs text-ink-500">
+                  Your best time: <span className="font-mono font-semibold text-pass-600 dark:text-pass-400">{fmt(bestTime)}</span>
+                </p>
+              )}
+              <div className="mt-6 flex gap-3">
+                <button
+                  autoFocus
+                  onClick={() => {
+                    setIntroOpen(false);
+                    start();
+                  }}
+                  className="btn-primary flex-1"
+                >
+                  Start hunting
+                </button>
+                <button onClick={() => setIntroOpen(false)} className="btn-ghost">
+                  Maybe later
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
 
   /* ---------- active: HUD ---------- */
-  const r = rank(elapsed);
+  const r = rank(elapsed, { principal: g.rankPrincipal, senior: g.rankSenior, engineer: g.rankEngineer });
   return (
     <>
       <div className="fixed bottom-5 right-5 z-[60] w-[min(320px,calc(100vw-2.5rem))] animate-pop rounded-2xl border border-ink-200 bg-white/95 p-4 shadow-2xl shadow-ink-900/10 backdrop-blur-xl dark:border-ink-800 dark:bg-ink-900/95 dark:shadow-black/50">
@@ -130,9 +201,11 @@ export default function BugHuntHUD() {
         {hintMsg && <p className="mt-2 font-mono text-[11px] text-amber-600 dark:text-amber-400">{hintMsg}</p>}
 
         <div className="mt-3 flex items-center gap-2">
+          {g.bugHints && (
           <button onClick={hint} disabled={won} className="flex-1 rounded-lg border border-ink-200 py-1.5 text-xs font-medium transition hover:border-amber-400 hover:text-amber-600 disabled:opacity-40 dark:border-ink-700 dark:hover:text-amber-400">
             💡 Hint
           </button>
+          )}
           <button
             onClick={() => setMuted(!muted)}
             aria-label={muted ? "Unmute" : "Mute"}

@@ -54,7 +54,7 @@ export default function About({ about, softSkills }: { about: AboutT; softSkills
             <Bug id="about-cards" slot={2} className="-right-2 -top-6" />
             {about.highlights.map((h, i) => (
               <Reveal key={i} delay={i * 90}>
-                <div className="card card-hover group h-full p-6">
+                <div className="tilt card card-hover group h-full p-6">
                   <span className="mb-5 grid h-9 w-9 place-items-center rounded-lg bg-pass-500/10 text-pass-600 transition-colors group-hover:bg-pass-500 group-hover:text-white dark:text-pass-400 dark:group-hover:text-ink-950">
                     <Check />
                   </span>

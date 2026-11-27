@@ -18,16 +18,17 @@ const NOTES: Record<Sfx, { f: number[]; gap: number; type: OscillatorType; len: 
 };
 
 /** Mute state shared across games (synced via localStorage + a window event). */
-export function useMuted(): [boolean, (m: boolean) => void] {
-  const [muted, setMuted] = useState(false);
+export function useMuted(defaultMuted = false): [boolean, (m: boolean) => void] {
+  const [muted, setMuted] = useState(defaultMuted);
   useEffect(() => {
     try {
-      setMuted(localStorage.getItem(MUTE_KEY) === "1");
+      const saved = localStorage.getItem(MUTE_KEY);
+      setMuted(saved === null ? defaultMuted : saved === "1");
     } catch {}
     const on = (e: Event) => setMuted((e as CustomEvent<boolean>).detail);
     window.addEventListener(MUTE_EVENT, on);
     return () => window.removeEventListener(MUTE_EVENT, on);
-  }, []);
+  }, [defaultMuted]);
   const set = useCallback((m: boolean) => {
     try {
       localStorage.setItem(MUTE_KEY, m ? "1" : "0");

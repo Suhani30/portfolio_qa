@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 export default function Terminal({ command, lines }: { command: string; lines: string[] }) {
   const [shown, setShown] = useState(0);
+  const [run, setRun] = useState(0);
 
   useEffect(() => {
     setShown(0);
@@ -14,7 +15,7 @@ export default function Terminal({ command, lines }: { command: string; lines: s
       if (i > lines.length) clearInterval(id);
     }, 520);
     return () => clearInterval(id);
-  }, [lines]);
+  }, [lines, run]);
 
   const done = shown > lines.length;
 
@@ -25,6 +26,14 @@ export default function Terminal({ command, lines }: { command: string; lines: s
         <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
         <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
         <span className="ml-3 font-mono text-[11px] text-ink-400">release-check</span>
+        <button
+          type="button"
+          onClick={() => setRun((r) => r + 1)}
+          disabled={!done}
+          className="ml-auto rounded-md border border-ink-200 px-2 py-0.5 font-mono text-[10px] text-ink-500 transition hover:border-pass-500 hover:text-pass-600 disabled:opacity-40 dark:border-ink-700 dark:hover:text-pass-400"
+        >
+          ↻ re-run
+        </button>
       </div>
 
       <div className="relative space-y-2 p-5 font-mono text-[12.5px] leading-relaxed sm:text-[13px]">
