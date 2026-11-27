@@ -18,6 +18,8 @@ import { BugHuntProvider } from "@/components/game/BugHuntProvider";
 import BugHuntHUD from "@/components/game/BugHuntHUD";
 import { CoinExplorerProvider } from "@/components/game/CoinExplorer";
 import CoinHUD from "@/components/game/CoinHUD";
+import WorldMode from "@/components/world/WorldMode";
+import type { IslandInfo } from "@/components/world/IslandPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +38,21 @@ export default async function Home() {
   ].filter(Boolean) as { href: string; label: string }[];
 
   const tools = c.skills.flatMap((s) => s.items.map((i) => i.name));
+
+  // One 3D island per visible section, in page order.
+  const n = g.islandNames as Record<string, string>;
+  const islands = [
+    { id: "top", kind: "home", name: n.top, label: "Home" },
+    v.about && { id: "about", kind: "about", name: n.about, label: "About" },
+    v.projects && { id: "work", kind: "work", name: n.work, label: "Projects" },
+    v.experience && { id: "experience", kind: "experience", name: n.experience, label: "Experience" },
+    v.skills && { id: "skills", kind: "skills", name: n.skills, label: "Skills" },
+    v.credentials && { id: "credentials", kind: "credentials", name: n.credentials, label: "Education" },
+    ...c.customSections
+      .filter((s) => s.visible)
+      .map((s) => ({ id: s.id, kind: "custom", name: n[s.id] || `${s.label} Isle`, label: s.label, sectionId: s.id })),
+    v.contact && { id: "contact", kind: "contact", name: n.contact, label: "Contact" },
+  ].filter(Boolean) as IslandInfo[];
 
   return (
     <GameSettingsProvider value={g}>
@@ -59,6 +76,7 @@ export default async function Home() {
           <Footer profile={c.profile} />
           <CoinHUD />
           <BugHuntHUD />
+          <WorldMode c={c} g={g} islands={islands} />
         </CoinExplorerProvider>
       </BugHuntProvider>
     </GameSettingsProvider>

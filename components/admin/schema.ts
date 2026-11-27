@@ -326,6 +326,19 @@ export const sections: Section[] = [
       },
       {
         key: "game",
+        label: "3D island world",
+        type: "group",
+        fields: [
+          {
+            key: "world3d",
+            label: "Open the site as a 3D island world",
+            type: "boolean",
+            help: "Visitors walk the cat from island to island; each island shows one section. They can switch to the classic page at any time. Coin settings, the cat's name and island names below are used in the 3D world too.",
+          },
+        ],
+      },
+      {
+        key: "game",
         label: "Coin Explorer (built into the page)",
         type: "group",
         fields: [
@@ -334,9 +347,11 @@ export const sections: Section[] = [
           { key: "coinValue", label: "Value of each coin", type: "number", min: 1, max: 100 },
           { key: "islandBonus", label: "Bonus for clearing an island", type: "number", min: 0, max: 500 },
           { key: "showScenery", label: "Show island scenery", type: "boolean", help: "Ocean background, island outlines and name signs behind each section." },
-          { key: "showBot", label: "Show the QA bot companion", type: "boolean", help: "A small robot follows you as you scroll and runs to the coins you tap." },
-          { key: "botName", label: "Bot name", type: "text" },
-          { key: "arrivalMessages", label: "Bot greets each new island", type: "boolean" },
+          { key: "showBot", label: "Show the cat companion", type: "boolean", help: "A chubby cat walks to the coins you tap." },
+          { key: "botName", label: "Cat name", type: "text" },
+          { key: "botKeyboard", label: "Arrow keys move the cat", type: "boolean", help: "Visitors can walk the cat around with the arrow keys; it picks up any coin it touches." },
+          { key: "botClickToWalk", label: "Click to walk the cat", type: "boolean", help: "Clicking or tapping an empty spot on the page walks the cat there." },
+          { key: "arrivalMessages", label: "Cat greets each new island", type: "boolean" },
           { key: "achievements", label: "Achievements & unlock toasts", type: "boolean" },
           { key: "finishTitle", label: "Completion title", type: "text", wide: true },
           { key: "finishMessage", label: "Completion message", type: "textarea", wide: true },

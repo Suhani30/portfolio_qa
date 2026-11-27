@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 /* Shared, synthesized sound effects for all mini-games: no audio files needed. */
 
-export type Sfx = "squash" | "win" | "coin" | "bonus" | "sail";
+export type Sfx = "squash" | "win" | "coin" | "bonus" | "sail" | "meow";
 
 const MUTE_KEY = "games:muted";
 const MUTE_EVENT = "games:muted-change";
@@ -15,6 +15,7 @@ const NOTES: Record<Sfx, { f: number[]; gap: number; type: OscillatorType; len: 
   coin: { f: [988, 1319], gap: 0.06, type: "square", len: 0.1 },
   bonus: { f: [659, 784, 988, 1319], gap: 0.07, type: "triangle", len: 0.14 },
   sail: { f: [330, 392], gap: 0.12, type: "sine", len: 0.25 },
+  meow: { f: [], gap: 0, type: "triangle", len: 0.42 },
 };
 
 /** Mute state shared across games (synced via localStorage + a window event). */
@@ -48,6 +49,23 @@ export function useSfx(muted: boolean) {
         ctxRef.current ??= new AC();
         const ctx = ctxRef.current;
         const n = NOTES[kind];
+        if (kind === "meow") {
+          // A short pitch glide up and down sounds like a little "mew".
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          const t = ctx.currentTime;
+          o.type = n.type;
+          o.frequency.setValueAtTime(560, t);
+          o.frequency.exponentialRampToValueAtTime(920, t + 0.12);
+          o.frequency.exponentialRampToValueAtTime(480, t + n.len);
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(0.06, t + 0.04);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + n.len);
+          o.connect(g).connect(ctx.destination);
+          o.start(t);
+          o.stop(t + n.len + 0.02);
+          return;
+        }
         n.f.forEach((f, i) => {
           const o = ctx.createOscillator();
           const g = ctx.createGain();

@@ -100,6 +100,8 @@ export type IslandNames = {
 export type GameSettings = {
   /* General */
   sound: boolean;
+  /** Open the portfolio as a 3D island world (visitors can switch to the classic page). */
+  world3d: boolean;
   /* Coin Explorer: built into the page */
   coinExplorer: boolean;
   coinsPerIsland: number;
@@ -108,6 +110,10 @@ export type GameSettings = {
   showScenery: boolean;
   showBot: boolean;
   botName: string;
+  /** Visitors can walk the bot with the arrow keys. */
+  botKeyboard: boolean;
+  /** Clicking an empty spot on the page walks the cat there. */
+  botClickToWalk: boolean;
   arrivalMessages: boolean;
   achievements: boolean;
   islandNames: IslandNames;
@@ -128,6 +134,7 @@ export type GameSettings = {
 
 export const DEFAULT_GAME: GameSettings = {
   sound: true,
+  world3d: true,
   coinExplorer: true,
   coinsPerIsland: 5,
   coinValue: 1,
@@ -135,6 +142,8 @@ export const DEFAULT_GAME: GameSettings = {
   showScenery: true,
   showBot: true,
   botName: "Testy",
+  botKeyboard: true,
+  botClickToWalk: true,
   arrivalMessages: true,
   achievements: true,
   islandNames: {

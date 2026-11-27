@@ -552,6 +552,7 @@
   },
   "game": {
     "sound": true,
+    "world3d": true,
     "coinExplorer": true,
     "coinsPerIsland": 5,
     "coinValue": 1,
@@ -559,6 +560,8 @@
     "showScenery": true,
     "showBot": true,
     "botName": "Testy",
+    "botKeyboard": true,
+    "botClickToWalk": true,
     "arrivalMessages": true,
     "achievements": true,
     "islandNames": {

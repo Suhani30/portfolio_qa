@@ -30,7 +30,7 @@ export default function ExperienceSection({ items }: { items: Experience[] }) {
                 <span
                   className={`absolute left-0 top-1.5 h-[15px] w-[15px] rounded-full border-2 md:left-[11rem] ${
                     current
-                      ? "border-pass-500 bg-pass-500 shadow-[0_0_0_4px_rgba(16,185,129,0.15)]"
+                      ? "border-pass-500 bg-pass-500 shadow-[0_0_0_4px_rgba(220,97,158,0.15)]"
                       : "border-ink-300 bg-white dark:border-ink-600 dark:bg-ink-950"
                   }`}
                 />

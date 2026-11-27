@@ -26,7 +26,7 @@ export default function ScrollProgress() {
   }, []);
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-[55] h-[3px]">
-      <div ref={ref} className="h-full origin-left scale-x-0 bg-gradient-to-r from-pass-400 via-teal-400 to-amber-400 shadow-[0_0_12px_rgba(52,211,153,0.6)]" />
+      <div ref={ref} className="h-full origin-left scale-x-0 bg-gradient-to-r from-pass-400 via-teal-400 to-amber-400 shadow-[0_0_12px_rgba(236,127,181,0.6)]" />
     </div>
   );
 }
