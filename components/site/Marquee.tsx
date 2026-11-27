@@ -8,6 +8,7 @@ export default function Marquee({ items }: { items: string[] }) {
         {row.map((t, i) => (
           <span
             key={i}
+            aria-hidden={i >= items.length || undefined}
             className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-ink-200 bg-white px-4 py-1.5 font-mono text-xs text-ink-600 transition hover:border-pass-500/50 hover:text-pass-700 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300 dark:hover:text-pass-300"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-pass-500" />

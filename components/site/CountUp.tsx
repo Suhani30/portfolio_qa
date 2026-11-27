@@ -6,13 +6,14 @@ import { useEffect, useRef, useState } from "react";
 export default function CountUp({ value, duration = 1400 }: { value: string; duration?: number }) {
   const m = value.match(/^(\D*)(\d+(?:\.\d+)?)(.*)$/);
   const ref = useRef<HTMLSpanElement>(null);
-  const [n, setN] = useState(0);
+  // null = show the real value (server HTML, no JS, before it scrolls into view).
+  const [n, setN] = useState<number | null>(null);
 
   useEffect(() => {
     if (!m) return;
     const target = parseFloat(m[2]);
     const el = ref.current;
-    if (!el) return;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let raf = 0;
     const io = new IntersectionObserver(
       ([e]) => {
@@ -41,7 +42,7 @@ export default function CountUp({ value, duration = 1400 }: { value: string; dur
   return (
     <span ref={ref} className="tabular-nums">
       {m[1]}
-      {n.toFixed(decimals)}
+      {n === null ? m[2] : n.toFixed(decimals)}
       {m[3]}
     </span>
   );

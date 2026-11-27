@@ -5,7 +5,13 @@ import { useBugHunt } from "./BugHuntProvider";
 import { fmtTime as fmt } from "./sfx";
 import { useGameSettings } from "./settings";
 
-function rank(sec: number, t: { principal: number; senior: number; engineer: number }) {
+function rank(sec: number, raw: { principal: number; senior: number; engineer: number }) {
+  // Admin values may be blank or out of order: fall back to defaults and keep them ascending.
+  const num = (v: number, d: number) => (Number.isFinite(v) && v > 0 ? v : d);
+  const principal = num(raw.principal, 45);
+  const senior = Math.max(principal, num(raw.senior, 90));
+  const engineer = Math.max(senior, num(raw.engineer, 180));
+  const t = { principal, senior, engineer };
   if (sec <= t.principal) return { title: "Principal QA", note: "Nothing escapes you. Zero defects in production." };
   if (sec <= t.senior) return { title: "Senior QA Engineer", note: "Fast, thorough and ready for release day." };
   if (sec <= t.engineer) return { title: "QA Engineer", note: "Solid coverage, every bug in the tracker." };
@@ -69,6 +75,17 @@ export default function BugHuntHUD() {
 
   useEffect(() => {
     if (!finishedAt) setDismissedWin(false);
+  }, [finishedAt]);
+
+  // Escape closes whichever Bug Hunt dialog is open.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setIntroOpen(false);
+      if (finishedAt) setDismissedWin(true);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [finishedAt]);
 
   if (!enabled || total === 0) return null;

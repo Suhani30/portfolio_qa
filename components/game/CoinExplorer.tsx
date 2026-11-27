@@ -91,22 +91,35 @@ export function CoinExplorerProvider({ children }: { children: React.ReactNode }
   const [pops, setPops] = useState<{ id: number; x: number; y: number; text: string }[]>([]);
   const [muted, setMuted] = useMuted(!g.sound);
   const play = useSfx(muted);
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  /** Update saved state from the latest value and keep stateRef in sync. */
+  const update = useCallback((fn: (s: Saved) => Saved) => {
+    const next = fn(stateRef.current);
+    stateRef.current = next;
+    setState(next);
+  }, []);
 
   /* ---------- persistence ---------- */
-  const loaded = useRef(false);
+  // The key whose saved data is in `state`. Saving waits until the loaded
+  // state has been committed, so a mount never writes `empty` over real progress.
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
   useEffect(() => {
+    let next = empty;
     try {
       const s = localStorage.getItem(storeKey);
-      setState(s ? { ...empty, ...(JSON.parse(s) as Saved) } : empty);
+      if (s) next = { ...empty, ...(JSON.parse(s) as Saved) };
     } catch {}
-    loaded.current = true;
+    stateRef.current = next;
+    setState(next);
+    setLoadedKey(storeKey);
   }, [storeKey]);
   useEffect(() => {
-    if (!loaded.current) return;
+    if (loadedKey !== storeKey) return;
     try {
       localStorage.setItem(storeKey, JSON.stringify(state));
     } catch {}
-  }, [state, storeKey]);
+  }, [state, storeKey, loadedKey]);
 
   /* ---------- measure islands ---------- */
   const names = g.islandNames as IslandNames & Record<string, string>;
@@ -143,19 +156,29 @@ export function CoinExplorerProvider({ children }: { children: React.ReactNode }
     const w = size.w;
     if (!w) return out;
     const gutter = (w - 1152) / 2;
+    const perRow = Math.max(1, Math.floor((w - 40) / 44));
     islands.forEach((isl, i) => {
       const r = seeded(i * 977 + 31);
       const usable = Math.max(120, isl.height - 220);
       for (let j = 0; j < perIsland; j++) {
-        const side = (j + i) % 2 === 0;
         let x: number;
+        let y: number;
         if (gutter > 90) {
+          // Wide screens: coins sit in the empty side gutters.
+          const side = (j + i) % 2 === 0;
           const cx = side ? gutter / 2 : w - gutter / 2;
           x = cx + (r() - 0.5) * gutter * 0.45;
+          y = isl.top + 120 + usable * ((j + 0.5) / perIsland) + (r() - 0.5) * 50;
         } else {
-          x = side ? 18 : w - 18;
+          // Narrow screens have no gutters, so coins sit in the empty padding
+          // band at the bottom of each section, never on top of links or cards.
+          // The hero has no bottom padding, so its coins use the top padding of
+          // the next section, below that section's name sign.
+          const row = Math.floor(j / perRow);
+          const inRow = Math.min(perRow, perIsland - row * perRow);
+          x = 20 + ((w - 40) * ((j % perRow) + 0.5)) / inRow;
+          y = i === 0 ? isl.top + isl.height + 54 + row * 24 : isl.top + isl.height - 66 + row * 36;
         }
-        const y = isl.top + 120 + usable * ((j + 0.5) / perIsland) + (r() - 0.5) * 50;
         out.push({ id: `${isl.id}-${j}`, island: isl.id, x, y });
       }
     });
@@ -163,8 +186,6 @@ export function CoinExplorerProvider({ children }: { children: React.ReactNode }
   }, [islands, size.w, perIsland]);
 
   /* ---------- helpers ---------- */
-  const stateRef = useRef(state);
-  stateRef.current = state;
   const coinsRef = useRef(coinList);
   coinsRef.current = coinList;
   const islandsRef = useRef(islands);
@@ -209,7 +230,7 @@ export function CoinExplorerProvider({ children }: { children: React.ReactNode }
           if (bonus) pop(c.x, c.y - 28, `+${bonus} BONUS`);
         }, 200);
       }
-      const finished = collected.length >= coinsRef.current.length && coinsRef.current.length > 0;
+      const finished = coinsRef.current.length > 0 && coinsRef.current.every((k) => collected.includes(k.id));
       const next: Saved = {
         ...s,
         collected,
@@ -218,12 +239,11 @@ export function CoinExplorerProvider({ children }: { children: React.ReactNode }
         startedAt: s.startedAt ?? Date.now(),
         finishedAt: finished ? Date.now() : s.finishedAt,
       };
-      stateRef.current = next;
-      setState(next);
+      update(() => next);
       setQueued((q) => q.filter((id) => id !== c.id));
       if (finished) window.setTimeout(() => playRef.current("win"), 600);
     },
-    [coinValue, bonus, flash, pop]
+    [coinValue, bonus, flash, pop, update]
   );
 
   const onCoinClick = useCallback(
@@ -238,18 +258,19 @@ export function CoinExplorerProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (!enabled || !g.achievements || !coinList.length || !islands.length) return;
     const s = state;
+    const got = coinList.filter((c) => s.collected.includes(c.id)).length;
     const tests: Record<string, boolean> = {
       first: s.collected.length >= 1,
       island: s.cleared.length >= 1,
-      hopper: s.visited.length >= islands.length,
-      half: s.collected.length >= Math.ceil(coinList.length / 2),
-      full: s.collected.length >= coinList.length,
+      hopper: islands.every((i) => s.visited.includes(i.id)),
+      half: got >= Math.ceil(coinList.length / 2),
+      full: got >= coinList.length,
     };
     const fresh = ACHIEVEMENTS.filter((a) => tests[a.id] && !s.achievements.includes(a.id));
     if (!fresh.length) return;
-    setState((prev) => ({ ...prev, achievements: [...prev.achievements, ...fresh.map((a) => a.id)] }));
+    update((prev) => ({ ...prev, achievements: [...prev.achievements, ...fresh.map((a) => a.id)] }));
     fresh.forEach((a, i) => window.setTimeout(() => flash(`${a.icon} Achievement unlocked: ${a.title}`), 900 + i * 2700));
-  }, [state, enabled, g.achievements, coinList.length, islands.length, flash]);
+  }, [state, enabled, g.achievements, coinList, islands, flash, update]);
 
   /* ---------- which island is in view ---------- */
   const currentRef = useRef<string | null>(null);
@@ -265,11 +286,8 @@ export function CoinExplorerProvider({ children }: { children: React.ReactNode }
       const first = currentRef.current === null;
       currentRef.current = isl.id;
       setCurrent(isl.id);
-      const s = stateRef.current;
-      if (s.visited.includes(isl.id)) return;
-      const next = { ...s, visited: [...s.visited, isl.id] };
-      stateRef.current = next;
-      setState(next);
+      if (stateRef.current.visited.includes(isl.id)) return;
+      update((s) => ({ ...s, visited: [...s.visited, isl.id] }));
       if (g.arrivalMessages && !first) {
         if (g.showBot) say(`Welcome to ${isl.name}! 🏝`);
         else flash(`⚓ ${isl.name}`);
@@ -278,7 +296,7 @@ export function CoinExplorerProvider({ children }: { children: React.ReactNode }
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [enabled, islands.length, g.arrivalMessages, g.showBot, say, flash]);
+  }, [enabled, islands.length, g.arrivalMessages, g.showBot, say, flash, update]);
 
   /* ---------- bot companion loop ---------- */
   const queuedRef = useRef(queued);
@@ -296,7 +314,13 @@ export function CoinExplorerProvider({ children }: { children: React.ReactNode }
       const w = root?.clientWidth ?? window.innerWidth;
       const rootTop = (root?.getBoundingClientRect().top ?? 0) + window.scrollY;
       const gutter = (w - 1152) / 2;
-      const target = coinsRef.current.find((c) => c.id === queuedRef.current[0]);
+      let target = coinsRef.current.find((c) => c.id === queuedRef.current[0]);
+      if (!target && queuedRef.current.length) {
+        const live = queuedRef.current.filter((id) => coinsRef.current.some((c) => c.id === id));
+        queuedRef.current = live;
+        setQueued(live);
+        target = coinsRef.current.find((c) => c.id === live[0]);
+      }
       const home = { x: gutter > 110 ? gutter / 2 : 30, y: window.scrollY - rootTop + window.innerHeight * 0.74 };
       if (p.x < 0) {
         p.x = home.x;
@@ -352,24 +376,37 @@ export function CoinExplorerProvider({ children }: { children: React.ReactNode }
 
   const reset = useCallback(() => {
     setQueued([]);
-    stateRef.current = empty;
-    setState(empty);
+    update(() => empty);
     currentRef.current = null;
     setCurrent(null);
-  }, []);
+  }, [update]);
 
   const scrollToIsland = useCallback((id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  const dismissCelebration = useCallback(() => setState((s) => ({ ...s, celebrated: true })), []);
+  const dismissCelebration = useCallback(() => update((s) => ({ ...s, celebrated: true })), [update]);
 
   const totalCoins = coinList.length;
   const maxScore = totalCoins * coinValue + islands.length * bonus;
 
+  // Saved ids can belong to sections that were since hidden or removed:
+  // count only the coins and islands that exist now.
+  const view = useMemo<Saved>(() => {
+    if (!coinList.length) return state;
+    const coinIds = new Set(coinList.map((c) => c.id));
+    const islandIds = new Set(islands.map((i) => i.id));
+    return {
+      ...state,
+      collected: state.collected.filter((id) => coinIds.has(id)),
+      cleared: state.cleared.filter((id) => islandIds.has(id)),
+      visited: state.visited.filter((id) => islandIds.has(id)),
+    };
+  }, [state, coinList, islands]);
+
   const value = useMemo<Ctx>(
-    () => ({ ...state, enabled, islands, coinList, totalCoins, maxScore, current, muted, setMuted, toast, reset, scrollToIsland, dismissCelebration }),
-    [state, enabled, islands, coinList, totalCoins, maxScore, current, muted, setMuted, toast, reset, scrollToIsland, dismissCelebration]
+    () => ({ ...view, enabled, islands, coinList, totalCoins, maxScore, current, muted, setMuted, toast, reset, scrollToIsland, dismissCelebration }),
+    [view, enabled, islands, coinList, totalCoins, maxScore, current, muted, setMuted, toast, reset, scrollToIsland, dismissCelebration]
   );
 
   return (

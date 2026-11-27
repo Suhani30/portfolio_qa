@@ -51,6 +51,15 @@ export default function CoinHUD() {
     return () => clearTimeout(t);
   }, [q.coins]);
 
+  const winOpen = !!q.finishedAt && !q.celebrated;
+  const { dismissCelebration } = q;
+  useEffect(() => {
+    if (!winOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && dismissCelebration();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [winOpen, dismissCelebration]);
+
   if (!q.enabled || !q.totalCoins) return null;
 
   const pct = q.collected.length / q.totalCoins;
@@ -185,8 +194,8 @@ export default function CoinHUD() {
       {showWin && (
         <>
           <Confetti />
-          <div className="fixed inset-0 z-[80] grid place-items-center bg-ink-950/60 p-5 backdrop-blur-sm">
-            <div role="dialog" aria-modal="true" aria-labelledby="ce-win" className="w-full max-w-md animate-pop overflow-hidden rounded-2xl border border-amber-400/30 bg-white shadow-2xl dark:bg-ink-900">
+          <div className="fixed inset-0 z-[80] grid place-items-center bg-ink-950/60 p-5 backdrop-blur-sm" onClick={q.dismissCelebration}>
+            <div onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="ce-win" className="w-full max-w-md animate-pop overflow-hidden rounded-2xl border border-amber-400/30 bg-white shadow-2xl dark:bg-ink-900">
               <div className="bg-gradient-to-br from-amber-400 via-teal-500 to-pass-500 p-6 text-center text-white">
                 <p className="text-4xl">🏆</p>
                 <h2 id="ce-win" className="mt-2 text-2xl font-semibold tracking-tight">

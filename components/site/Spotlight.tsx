@@ -26,10 +26,11 @@ export default function Spotlight() {
       card.style.transform = `perspective(900px) rotateX(${(-py * 5).toFixed(2)}deg) rotateY(${(px * 6).toFixed(2)}deg) translateY(-2px)`;
     };
     window.addEventListener("pointermove", onMove, { passive: true });
-    document.addEventListener("pointerleave", untilt);
+    // pointerleave never fires on `document`; the root element gets it when the cursor leaves the window.
+    document.documentElement.addEventListener("pointerleave", untilt);
     return () => {
       window.removeEventListener("pointermove", onMove);
-      document.removeEventListener("pointerleave", untilt);
+      document.documentElement.removeEventListener("pointerleave", untilt);
     };
   }, []);
   return null;
