@@ -1,13 +1,15 @@
 import type { SkillGroup } from "@/lib/types";
 import SectionHeader from "./SectionHeader";
 import Reveal from "./Reveal";
+import Bug from "@/components/game/Bug";
 
 const levelLabel = ["", "Working", "Proficient", "Advanced"];
 
 export default function Skills({ groups }: { groups: SkillGroup[] }) {
   return (
-    <section id="skills" className="border-t border-ink-200/70 py-24 sm:py-32 dark:border-ink-900">
-      <div className="container-x">
+    <section id="skills" className="relative border-t border-ink-200/70 py-24 sm:py-32 dark:border-ink-900">
+      <div className="container-x relative">
+        <Bug id="skills-legend" slot={14} className="right-4 top-0" />
         <SectionHeader
           index="04"
           file="toolchain.config.ts"
@@ -28,7 +30,8 @@ export default function Skills({ groups }: { groups: SkillGroup[] }) {
           ))}
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="relative grid gap-4 md:grid-cols-2">
+          <Bug id="skills" slot={6} className="-bottom-6 right-[20%]" />
           {groups.map((g, i) => (
             <Reveal key={g.id} delay={(i % 2) * 80}>
               <div className="card card-hover h-full p-6 sm:p-7">

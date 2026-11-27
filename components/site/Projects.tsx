@@ -2,12 +2,16 @@ import type { Project } from "@/lib/types";
 import SectionHeader from "./SectionHeader";
 import Reveal from "./Reveal";
 import { ArrowUpRight, Check } from "./Icons";
+import Bug from "@/components/game/Bug";
 
 function FeaturedCard({ p, i }: { p: Project; i: number }) {
   return (
     <Reveal as="article" delay={i * 60}>
       <div className="card card-hover group relative overflow-hidden">
         <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-pass-500/0 blur-3xl transition-colors duration-700 group-hover:bg-pass-500/10" />
+        {i === 1 && <Bug id="project-case" slot={3} className="bottom-5 right-5" />}
+        {i === 0 && <Bug id="project-case-a" slot={11} className="right-5 top-5" />}
+        {i === 2 && <Bug id="project-case-c" slot={12} className="bottom-5 left-[45%]" />}
         <div className="relative grid gap-8 p-7 sm:p-9 lg:grid-cols-[1fr_1.15fr] lg:gap-12">
           <div className="flex flex-col">
             <div className="flex items-center gap-3 font-mono text-xs text-ink-500">
@@ -103,7 +107,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
   const rest = projects.filter((p) => !p.featured);
 
   return (
-    <section id="work" className="border-t border-ink-200/70 py-24 sm:py-32 dark:border-ink-900">
+    <section id="work" className="relative border-t border-ink-200/70 py-24 sm:py-32 dark:border-ink-900">
       <div className="container-x">
         <SectionHeader
           index="02"
@@ -124,7 +128,8 @@ export default function Projects({ projects }: { projects: Project[] }) {
               <h3 className="text-xl font-semibold tracking-tight text-ink-950 dark:text-white">More products & automation labs</h3>
               <span className="font-mono text-xs text-ink-500">{rest.length} items</span>
             </Reveal>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="relative grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Bug id="project-grid" slot={4} className="-bottom-6 left-[30%]" />
               {rest.map((p, i) => (
                 <SmallCard key={p.id} p={p} i={i} />
               ))}

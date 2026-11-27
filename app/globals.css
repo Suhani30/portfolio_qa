@@ -27,7 +27,7 @@
     @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
   }
   .card {
-    @apply rounded-2xl border border-ink-200/80 bg-white/70 backdrop-blur-sm transition-colors dark:border-ink-800 dark:bg-ink-900/60;
+    @apply relative rounded-2xl border border-ink-200/80 bg-white/70 backdrop-blur-sm transition-colors dark:border-ink-800 dark:bg-ink-900/60;
   }
   .card-hover {
     @apply transition-all duration-300 hover:-translate-y-0.5 hover:border-pass-500/40 hover:shadow-[0_8px_40px_-12px_rgba(16,185,129,0.25)];
@@ -56,6 +56,93 @@
   background-size: 44px 44px;
 }
 
+/* Cursor spotlight on cards (vars set by components/site/Spotlight.tsx) */
+.card::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(16, 185, 129, 0.09), transparent 45%);
+}
+.card:hover::before {
+  opacity: 1;
+}
+
+/* ---------------- Island Quest ---------------- */
+.iq-ocean {
+  background-color: rgba(14, 165, 233, 0.06);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(56, 189, 248, 0.18) 1px, transparent 0),
+    repeating-linear-gradient(170deg, transparent 0 38px, rgba(56, 189, 248, 0.05) 38px 40px);
+  background-size: 26px 26px, 100% 100%;
+  animation: iq-drift 18s linear infinite;
+}
+@keyframes iq-drift {
+  to { background-position: 26px 26px, 0 0; }
+}
+.iq-island {
+  background: radial-gradient(ellipse at 50% 0%, rgba(16, 185, 129, 0.14), rgba(16, 185, 129, 0.04) 60%),
+    rgba(253, 230, 138, 0.06);
+  border: 2px dashed rgba(245, 158, 11, 0.35);
+  box-shadow: 0 0 0 8px rgba(253, 230, 138, 0.08), 0 0 0 22px rgba(56, 189, 248, 0.07);
+  transition: box-shadow 0.4s, border-color 0.4s;
+}
+.dark .iq-island {
+  background: radial-gradient(ellipse at 50% 0%, rgba(52, 211, 153, 0.1), rgba(52, 211, 153, 0.025) 60%),
+    rgba(253, 230, 138, 0.025);
+}
+.iq-island-active {
+  border-color: rgba(245, 158, 11, 0.7);
+  box-shadow: 0 0 0 8px rgba(253, 230, 138, 0.14), 0 0 0 22px rgba(56, 189, 248, 0.1), 0 0 60px rgba(245, 158, 11, 0.12);
+}
+.iq-island-cleared {
+  border-style: solid;
+  border-color: rgba(16, 185, 129, 0.55);
+}
+.iq-palm { animation: iq-sway 4s ease-in-out infinite; transform-origin: bottom center; }
+@keyframes iq-sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(5deg); } }
+
+.iq-coin,
+.iq-coin-static {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 30%, #fff7c2 0 18%, #fcd34d 19% 55%, #d97706 56% 100%);
+  box-shadow: inset 0 0 0 2px rgba(146, 64, 14, 0.55), 0 0 14px rgba(251, 191, 36, 0.55);
+}
+.iq-coin {
+  margin: -11px 0 0 -11px;
+  animation: iq-spin 1.6s ease-in-out infinite, iq-bob 2.2s ease-in-out infinite;
+}
+.iq-coin-static { width: 18px; height: 18px; }
+@keyframes iq-spin { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(0.25); } }
+@keyframes iq-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -5px; } }
+
+.iq-bot[data-facing="left"] .iq-bot-body { transform: scaleX(-1); }
+.iq-bot[data-moving="1"] .iq-bot-body svg { animation: iq-walk 0.32s ease-in-out infinite; }
+.iq-bot[data-moving="0"] .iq-bot-body svg { animation: iq-idle 2.4s ease-in-out infinite; }
+.iq-bot[data-moving="1"] .iq-leg-l { animation: iq-step 0.32s ease-in-out infinite; }
+.iq-bot[data-moving="1"] .iq-leg-r { animation: iq-step 0.32s ease-in-out infinite reverse; }
+.iq-antenna { animation: iq-blink 1.6s steps(1) infinite; }
+@keyframes iq-walk { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-3px) rotate(3deg); } }
+@keyframes iq-idle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@keyframes iq-step { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@keyframes iq-blink { 0%, 70% { opacity: 1; } 71%, 100% { opacity: 0.35; } }
+
+/* Bug Hunt hint highlight */
+.bug-hint {
+  border-radius: 9999px;
+  animation: bug-hint 0.7s ease-in-out 3;
+}
+@keyframes bug-hint {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+  50% { box-shadow: 0 0 0 14px rgba(245, 158, 11, 0.35); }
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(16px);
@@ -70,7 +157,94 @@
   html {
     scroll-behavior: auto;
   }
-  .reveal {
+  /* Cursor spotlight on cards (vars set by components/site/Spotlight.tsx) */
+.card::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(16, 185, 129, 0.09), transparent 45%);
+}
+.card:hover::before {
+  opacity: 1;
+}
+
+/* ---------------- Island Quest ---------------- */
+.iq-ocean {
+  background-color: rgba(14, 165, 233, 0.06);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(56, 189, 248, 0.18) 1px, transparent 0),
+    repeating-linear-gradient(170deg, transparent 0 38px, rgba(56, 189, 248, 0.05) 38px 40px);
+  background-size: 26px 26px, 100% 100%;
+  animation: iq-drift 18s linear infinite;
+}
+@keyframes iq-drift {
+  to { background-position: 26px 26px, 0 0; }
+}
+.iq-island {
+  background: radial-gradient(ellipse at 50% 0%, rgba(16, 185, 129, 0.14), rgba(16, 185, 129, 0.04) 60%),
+    rgba(253, 230, 138, 0.06);
+  border: 2px dashed rgba(245, 158, 11, 0.35);
+  box-shadow: 0 0 0 8px rgba(253, 230, 138, 0.08), 0 0 0 22px rgba(56, 189, 248, 0.07);
+  transition: box-shadow 0.4s, border-color 0.4s;
+}
+.dark .iq-island {
+  background: radial-gradient(ellipse at 50% 0%, rgba(52, 211, 153, 0.1), rgba(52, 211, 153, 0.025) 60%),
+    rgba(253, 230, 138, 0.025);
+}
+.iq-island-active {
+  border-color: rgba(245, 158, 11, 0.7);
+  box-shadow: 0 0 0 8px rgba(253, 230, 138, 0.14), 0 0 0 22px rgba(56, 189, 248, 0.1), 0 0 60px rgba(245, 158, 11, 0.12);
+}
+.iq-island-cleared {
+  border-style: solid;
+  border-color: rgba(16, 185, 129, 0.55);
+}
+.iq-palm { animation: iq-sway 4s ease-in-out infinite; transform-origin: bottom center; }
+@keyframes iq-sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(5deg); } }
+
+.iq-coin,
+.iq-coin-static {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 30%, #fff7c2 0 18%, #fcd34d 19% 55%, #d97706 56% 100%);
+  box-shadow: inset 0 0 0 2px rgba(146, 64, 14, 0.55), 0 0 14px rgba(251, 191, 36, 0.55);
+}
+.iq-coin {
+  margin: -11px 0 0 -11px;
+  animation: iq-spin 1.6s ease-in-out infinite, iq-bob 2.2s ease-in-out infinite;
+}
+.iq-coin-static { width: 18px; height: 18px; }
+@keyframes iq-spin { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(0.25); } }
+@keyframes iq-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -5px; } }
+
+.iq-bot[data-facing="left"] .iq-bot-body { transform: scaleX(-1); }
+.iq-bot[data-moving="1"] .iq-bot-body svg { animation: iq-walk 0.32s ease-in-out infinite; }
+.iq-bot[data-moving="0"] .iq-bot-body svg { animation: iq-idle 2.4s ease-in-out infinite; }
+.iq-bot[data-moving="1"] .iq-leg-l { animation: iq-step 0.32s ease-in-out infinite; }
+.iq-bot[data-moving="1"] .iq-leg-r { animation: iq-step 0.32s ease-in-out infinite reverse; }
+.iq-antenna { animation: iq-blink 1.6s steps(1) infinite; }
+@keyframes iq-walk { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-3px) rotate(3deg); } }
+@keyframes iq-idle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@keyframes iq-step { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@keyframes iq-blink { 0%, 70% { opacity: 1; } 71%, 100% { opacity: 0.35; } }
+
+/* Bug Hunt hint highlight */
+.bug-hint {
+  border-radius: 9999px;
+  animation: bug-hint 0.7s ease-in-out 3;
+}
+@keyframes bug-hint {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+  50% { box-shadow: 0 0 0 14px rgba(245, 158, 11, 0.35); }
+}
+
+.reveal {
     opacity: 1;
     transform: none;
     transition: none;

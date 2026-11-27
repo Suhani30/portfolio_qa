@@ -81,6 +81,24 @@ export type Visibility = {
   skills: boolean;
   credentials: boolean;
   contact: boolean;
+  /** Legacy switch for Bug Hunt; superseded by SiteContent.game */
+  game?: boolean;
+};
+
+export type GameSettings = {
+  bugHunt: boolean;
+  bugCount: number;
+  islandQuest: boolean;
+  coinsPerIsland: number;
+  islandBonus: number;
+};
+
+export const DEFAULT_GAME: GameSettings = {
+  bugHunt: true,
+  bugCount: 9,
+  islandQuest: true,
+  coinsPerIsland: 5,
+  islandBonus: 10,
 };
 
 export type Contact = { heading: string; message: string; cta: string };
@@ -99,4 +117,6 @@ export type SiteContent = {
   customSections: CustomSection[];
   contact: Contact;
   visibility: Visibility;
+  /** Optional so older content files keep working. */
+  game?: GameSettings;
 };

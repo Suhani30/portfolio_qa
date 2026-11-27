@@ -311,6 +311,25 @@ export const sections: Section[] = [
     ],
   },
   {
+    id: "games",
+    label: "Mini-games",
+    description: "Interactive games visitors can play while they explore your portfolio.",
+    fields: [
+      {
+        key: "game",
+        label: "Games",
+        type: "group",
+        fields: [
+          { key: "bugHunt", label: "Bug Hunt", type: "boolean", help: "Visitors find and squash bugs hidden across every section." },
+          { key: "bugCount", label: "Number of bugs", type: "number", min: 1, max: 18, help: "1 to 18 bugs, spread across the page." },
+          { key: "islandQuest", label: "Island Quest", type: "boolean", help: "Each section becomes an island. Visitors walk or sail a QA bot across them to collect coins." },
+          { key: "coinsPerIsland", label: "Coins per island", type: "number", min: 1, max: 12 },
+          { key: "islandBonus", label: "Bonus coins for clearing an island", type: "number", min: 0, max: 100 },
+        ],
+      },
+    ],
+  },
+  {
     id: "visibility",
     label: "Visibility",
     description: "Show or hide whole sections of the site.",

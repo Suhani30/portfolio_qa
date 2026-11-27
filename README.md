@@ -16,6 +16,11 @@ The design follows a **test-runner / GitHub** look: a live "release check" termi
 - **Education & training**
 - **Custom sections** that you create from the CMS (certifications, awards and so on)
 - **Contact** card with a copy-email button
+- **Two mini-games**, started from the floating **"Play while you browse"** launcher:
+  - **Island Quest**: every section becomes an island on an animated ocean. Visitors walk a small QA bot (arrow keys / WASD / on-screen pad, Shift to sprint) or sail between islands, collect coins and earn a bonus for each island they clear. The panel shows coins, islands cleared and a clickable island map, and finishing every island brings up a "Voyage complete" screen.
+  - **Bug Hunt**: 1 to 18 bugs (set in the admin) hide across the sections. Visitors squash them against the clock with hints, sound effects, a QA rank and a best time.
+  - Progress survives a refresh, and both games can be configured or switched off in **Admin → Mini-games**.
+- Cursor spotlight glow on cards
 - Dark mode by default plus a light mode toggle, fully responsive, subtle scroll reveals and hover effects, and respect for `prefers-reduced-motion`
 
 **CMS admin** (`/admin`)
@@ -23,6 +28,7 @@ The design follows a **test-runner / GitHub** look: a live "release check" termi
 - Edit any field, and add, delete, duplicate or reorder items in every list
 - Tag inputs, multi-line lists, toggles and nested lists (for example, tools inside skill groups)
 - Mark projects as **featured**, and show or hide whole sections
+- **Mini-games** panel: switch each game on or off, set the bug count with −/+ (1–18), and set coins per island and the island bonus
 - Create **new custom sections**, which appear on the site and in the navigation automatically
 - Unsaved-changes indicator, **Ctrl/Cmd + S** to save, and a Discard button
 - Change the password, and export or import all content as JSON
@@ -91,6 +97,7 @@ app/
     auth/logout/route.ts  POST logout
     auth/password/route.ts POST change password
 components/
+  game/                   GameLauncher, Island Quest (world, bot, HUD), Bug Hunt (provider, Bug, HUD), shared sfx
   site/                   Hero, About, Projects, Experience, Skills, Credentials,
                           CustomSections, Contact, Nav, Footer, Terminal, Reveal, Icons…
   admin/                  AdminApp (shell, login, settings), FieldEditor, schema

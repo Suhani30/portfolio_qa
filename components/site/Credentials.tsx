@@ -1,11 +1,14 @@
 import type { Education, Training } from "@/lib/types";
 import Reveal from "./Reveal";
+import Bug from "@/components/game/Bug";
 
 export default function Credentials({ education, training }: { education: Education[]; training: Training[] }) {
   if (!education.length && !training.length) return null;
   return (
-    <section id="credentials" className="border-t border-ink-200/70 py-24 sm:py-28 dark:border-ink-900">
-      <div className="container-x grid gap-14 lg:grid-cols-[1fr_1.6fr]">
+    <section id="credentials" className="relative border-t border-ink-200/70 py-24 sm:py-28 dark:border-ink-900">
+      <div className="container-x relative grid gap-14 lg:grid-cols-[1fr_1.6fr]">
+        <Bug id="credentials" slot={7} className="-top-10 left-[40%]" />
+        <Bug id="credentials-b" slot={15} className="-bottom-12 right-[12%]" />
         <div>
           <Reveal>
             <div className="mb-4 flex items-center gap-3">

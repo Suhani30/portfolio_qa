@@ -2,11 +2,13 @@ import type { Experience } from "@/lib/types";
 import SectionHeader from "./SectionHeader";
 import Reveal from "./Reveal";
 import { Check } from "./Icons";
+import Bug from "@/components/game/Bug";
 
 export default function ExperienceSection({ items }: { items: Experience[] }) {
   return (
-    <section id="experience" className="border-t border-ink-200/70 py-24 sm:py-32 dark:border-ink-900">
-      <div className="container-x">
+    <section id="experience" className="relative border-t border-ink-200/70 py-24 sm:py-32 dark:border-ink-900">
+      <div className="container-x relative">
+        <Bug id="experience" slot={5} className="right-2 top-0" />
         <SectionHeader
           index="03"
           file="experience.log"
@@ -14,6 +16,7 @@ export default function ExperienceSection({ items }: { items: Experience[] }) {
           intro="I moved from systems and data work into dedicated QA, and now own quality on multi-module products."
         />
 
+        <Bug id="experience-timeline" slot={13} className="-bottom-10 left-[40%]" />
         <ol className="relative space-y-6 before:absolute before:bottom-2 before:left-[7px] before:top-2 before:w-px before:bg-gradient-to-b before:from-pass-500/60 before:via-ink-200 before:to-transparent md:before:left-[calc(11rem+7px)] dark:before:via-ink-800">
           {items.map((e, i) => {
             const current = /present|current|now/i.test(e.end);

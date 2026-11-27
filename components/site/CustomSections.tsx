@@ -10,7 +10,7 @@ export default function CustomSections({ sections }: { sections: CustomSection[]
   return (
     <>
       {visible.map((s, si) => (
-        <section key={s.id} id={s.id} className="border-t border-ink-200/70 py-24 sm:py-28 dark:border-ink-900">
+        <section key={s.id} id={s.id} data-island={s.label} className="relative border-t border-ink-200/70 py-24 sm:py-28 dark:border-ink-900">
           <div className="container-x">
             <SectionHeader
               index={String(7 + si).padStart(2, "0")}

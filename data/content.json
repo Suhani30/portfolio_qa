@@ -541,5 +541,12 @@
     "skills": true,
     "credentials": true,
     "contact": true
+  },
+  "game": {
+    "bugHunt": true,
+    "bugCount": 9,
+    "islandQuest": true,
+    "coinsPerIsland": 5,
+    "islandBonus": 10
   }
 }

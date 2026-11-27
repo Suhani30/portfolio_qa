@@ -1,5 +1,6 @@
 import type { Profile, Stat } from "@/lib/types";
 import Terminal from "./Terminal";
+import Bug from "@/components/game/Bug";
 import { ArrowRight, Github, Linkedin, Pin } from "./Icons";
 
 function splitTagline(t: string): [string, string] {
@@ -20,6 +21,7 @@ export default function Hero({ profile, stats }: { profile: Profile; stats: Stat
       <div className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-pass-500/10 blur-3xl dark:bg-pass-500/[0.08]" />
 
       <div className="container-x relative">
+        <Bug id="hero-heading" slot={9} className="right-4 top-0 lg:left-[44%] lg:right-auto" />
         <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
           <div>
             <div className="mb-7 flex animate-fade-up flex-wrap items-center gap-3">
@@ -81,12 +83,15 @@ export default function Hero({ profile, stats }: { profile: Profile; stats: Stat
             </div>
           </div>
 
-          <div className="animate-fade-up [animation-delay:350ms]">
+          <div className="relative animate-fade-up [animation-delay:350ms]">
+            <Bug id="hero-terminal" slot={0} className="-top-4 right-10" />
             <Terminal command={profile.terminalCommand} lines={profile.terminalLines} />
           </div>
         </div>
 
         {stats.length > 0 && (
+          <div className="relative">
+          <Bug id="hero-stats" slot={1} className="-bottom-5 left-[38%]" />
           <dl className="mt-20 grid animate-fade-up grid-cols-2 gap-px overflow-hidden rounded-2xl border border-ink-200 bg-ink-200 [animation-delay:450ms] lg:grid-cols-4 dark:border-ink-800 dark:bg-ink-800">
             {stats.map((s, i) => (
               <div
@@ -99,6 +104,7 @@ export default function Hero({ profile, stats }: { profile: Profile; stats: Stat
               </div>
             ))}
           </dl>
+          </div>
         )}
       </div>
     </section>

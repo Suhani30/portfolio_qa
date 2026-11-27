@@ -1,6 +1,7 @@
 import type { Contact as ContactT, Profile } from "@/lib/types";
 import Reveal from "./Reveal";
 import CopyButton from "./CopyButton";
+import Bug from "@/components/game/Bug";
 import { ArrowUpRight, Github, Linkedin, Mail, Phone } from "./Icons";
 
 export default function Contact({ contact, profile }: { contact: ContactT; profile: Profile }) {
@@ -12,13 +13,15 @@ export default function Contact({ contact, profile }: { contact: ContactT; profi
   ].filter(Boolean) as { icon: React.ReactNode; label: string; value: string; href: string }[];
 
   return (
-    <section id="contact" className="border-t border-ink-200/70 py-24 sm:py-32 dark:border-ink-900">
+    <section id="contact" className="relative border-t border-ink-200/70 py-24 sm:py-32 dark:border-ink-900">
       <div className="container-x">
         <Reveal>
           <div className="relative overflow-hidden rounded-3xl border border-ink-200 bg-ink-950 p-8 text-white sm:p-12 lg:p-16 dark:border-ink-800">
             <div className="bg-grid pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(ellipse_at_top_right,black,transparent_70%)]" />
             <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-pass-500/20 blur-3xl" />
 
+            <Bug id="contact" slot={8} className="right-5 top-5" />
+            <Bug id="contact-b" slot={16} className="bottom-5 left-5" />
             <div className="relative grid gap-12 lg:grid-cols-[1.3fr_1fr] lg:items-end">
               <div>
                 <p className="kicker !text-pass-400">{"// contact.spec.ts"}</p>

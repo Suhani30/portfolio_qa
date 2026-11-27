@@ -236,21 +236,34 @@ export function FieldInput({ field, value, onChange, depth }: { field: Field; va
           <textarea id={id} rows={3} value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} className={`${inputCls} resize-y leading-relaxed`} />
         </div>
       );
-    case "number":
+    case "number": {
+      const n = Number(value ?? 0);
+      const clamp = (x: number) => Math.max(field.min ?? -Infinity, Math.min(field.max ?? Infinity, x));
+      const stepBtn =
+        "grid h-[42px] w-11 shrink-0 place-items-center text-lg font-medium text-ink-600 transition hover:bg-pass-500/10 hover:text-pass-600 disabled:opacity-30 disabled:hover:bg-transparent dark:text-ink-300 dark:hover:text-pass-400";
       return (
         <div>
           <Label field={field} htmlFor={id} />
-          <input
-            id={id}
-            type="number"
-            min={field.min}
-            max={field.max}
-            value={Number(value ?? 0)}
-            onChange={(e) => onChange(Number(e.target.value))}
-            className={inputCls}
-          />
+          <div className="flex w-full max-w-[220px] overflow-hidden rounded-lg border border-ink-200 bg-white focus-within:border-pass-500 focus-within:ring-4 focus-within:ring-pass-500/10 dark:border-ink-800 dark:bg-ink-950">
+            <button type="button" aria-label={`Decrease ${field.label}`} className={stepBtn} disabled={field.min !== undefined && n <= field.min} onClick={() => onChange(clamp(n - 1))}>
+              −
+            </button>
+            <input
+              id={id}
+              type="number"
+              min={field.min}
+              max={field.max}
+              value={n}
+              onChange={(e) => onChange(clamp(Number(e.target.value)))}
+              className="w-full min-w-0 border-x border-ink-200 bg-transparent text-center font-mono text-sm text-ink-900 outline-none [appearance:textfield] dark:border-ink-800 dark:text-ink-100 [&::-webkit-inner-spin-button]:appearance-none"
+            />
+            <button type="button" aria-label={`Increase ${field.label}`} className={stepBtn} disabled={field.max !== undefined && n >= field.max} onClick={() => onChange(clamp(n + 1))}>
+              +
+            </button>
+          </div>
         </div>
       );
+    }
     case "boolean":
       return <Toggle value={Boolean(value)} onChange={onChange} label={field.label} help={field.help} />;
     case "tags":

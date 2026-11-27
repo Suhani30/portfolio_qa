@@ -2,17 +2,19 @@ import type { About as AboutT } from "@/lib/types";
 import SectionHeader from "./SectionHeader";
 import Reveal from "./Reveal";
 import { Check } from "./Icons";
+import Bug from "@/components/game/Bug";
 
 const lifecycle = ["Requirement", "Test plan", "Execute", "Report", "Verify fix", "Release"];
 
 export default function About({ about, softSkills }: { about: AboutT; softSkills: string[] }) {
   return (
-    <section id="about" className="py-24 sm:py-32">
+    <section id="about" className="relative py-24 sm:py-32">
       <div className="container-x">
         <SectionHeader index="01" file="about.spec.ts" title={about.heading} />
 
         <div className="grid gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-          <div className="space-y-5">
+          <div className="relative space-y-5">
+            <Bug id="about-lifecycle" slot={10} className="-bottom-8 right-[20%]" />
             {about.paragraphs.map((p, i) => (
               <Reveal key={i} delay={i * 80}>
                 <p className="text-pretty text-[17px] leading-relaxed text-ink-600 dark:text-ink-300">{p}</p>
@@ -48,7 +50,8 @@ export default function About({ about, softSkills }: { about: AboutT; softSkills
             )}
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="relative grid gap-4 sm:grid-cols-2">
+            <Bug id="about-cards" slot={2} className="-right-2 -top-6" />
             {about.highlights.map((h, i) => (
               <Reveal key={i} delay={i * 90}>
                 <div className="card card-hover group h-full p-6">
