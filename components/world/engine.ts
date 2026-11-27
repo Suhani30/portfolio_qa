@@ -1,9 +1,9 @@
 import * as THREE from "three";
-import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { PLATEAU, SHORE, buildBridge, buildClouds, buildIsland, buildSky, buildWater, bridgeY, groundDetailTexture, islandHeight, rng, shapeR, wind, woodTexture, type Bridge, type Obstacle, type Shape } from "./terrain";
 
 /* =====================================================================
- * 3D island world: a chain of floating islands joined by rope bridges on a
- * pastel ocean. A chubby 3D cat walks between them. Every island is one
+ * 3D island world: a chain of islands joined by rope bridges on a sunset
+ * ocean. A chubby 3D cat walks between them. Every island is one
  * section of the portfolio; arriving on it opens that section's details.
  * Plain three.js, no React: World.tsx drives it through the returned API.
  * ===================================================================== */
@@ -44,37 +44,6 @@ const KIND_COLOR: Record<string, string> = {
   contact: "#a6bbff",
   custom: "#d9a3e8",
 };
-
-function rng(seed: number) {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-const GRASS_Y = 0.42;
-const SAND_Y = 0.2;
-
-type IslandGeo = { x: number; z: number; r: number; color: THREE.Color; crystal: THREE.Object3D; glow: THREE.Sprite };
-type Bridge = { ax: number; az: number; bx: number; bz: number; half: number };
-
-function gradientTexture(stops: [number, string][], w = 4, h = 512) {
-  const c = document.createElement("canvas");
-  c.width = w;
-  c.height = h;
-  const g = c.getContext("2d")!;
-  const lg = g.createLinearGradient(0, 0, 0, h);
-  stops.forEach(([o, col]) => lg.addColorStop(o, col));
-  g.fillStyle = lg;
-  g.fillRect(0, 0, w, h);
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
-  return t;
-}
 
 function glowTexture() {
   const c = document.createElement("canvas");
@@ -322,228 +291,6 @@ function buildCat(): Cat {
 }
 
 /* =====================================================================
- * Scenery
- * ===================================================================== */
-function jitterCylinder(geo: THREE.CylinderGeometry, r: () => number, amount: number, keepTop: boolean) {
-  const pos = geo.attributes.position as THREE.BufferAttribute;
-  const top = (geo.parameters.height ?? 1) / 2;
-  for (let i = 0; i < pos.count; i++) {
-    const y = pos.getY(i);
-    if (keepTop && y >= top - 1e-3) continue;
-    const x = pos.getX(i);
-    const z = pos.getZ(i);
-    const a = Math.atan2(z, x);
-    const k = 1 + (Math.sin(a * 3 + y) * 0.5 + Math.sin(a * 7.3) * 0.3 + (r() - 0.5) * 0.4) * amount;
-    pos.setXYZ(i, x * k, y + (r() - 0.5) * amount * 0.6, z * k);
-  }
-  geo.computeVertexNormals();
-}
-
-function vertexGradient(geo: THREE.BufferGeometry, top: THREE.Color, bottom: THREE.Color, y0: number, y1: number) {
-  const pos = geo.attributes.position as THREE.BufferAttribute;
-  const cols = new Float32Array(pos.count * 3);
-  const c = new THREE.Color();
-  for (let i = 0; i < pos.count; i++) {
-    const k = THREE.MathUtils.clamp((pos.getY(i) - y0) / (y1 - y0), 0, 1);
-    c.copy(bottom).lerp(top, k);
-    cols.set([c.r, c.g, c.b], i * 3);
-  }
-  geo.setAttribute("color", new THREE.BufferAttribute(cols, 3));
-}
-
-function buildIsland(scene: THREE.Scene, x: number, z: number, radius: number, kind: string, seed: number, glowTex: THREE.Texture, avoid: number[]): IslandGeo {
-  const r = rng(seed);
-  const tint = new THREE.Color(KIND_COLOR[kind] ?? KIND_COLOR.custom);
-  const g = new THREE.Group();
-  g.position.set(x, 0, z);
-  scene.add(g);
-
-  // rocky underside: lavender stone fading to warm sand near the top
-  const rock = new THREE.CylinderGeometry(radius * 0.98, radius * 0.42, 4.2, 48, 6);
-  jitterCylinder(rock, r, 0.14, true);
-  vertexGradient(rock, new THREE.Color("#f2d3c4"), new THREE.Color("#6f5a8a"), -2.1, 2.1);
-  const rockMesh = new THREE.Mesh(rock, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, flatShading: true }));
-  rockMesh.position.y = SAND_Y - 2.1;
-  rockMesh.receiveShadow = true;
-  g.add(rockMesh);
-
-  // beach
-  const sand = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius * 0.99, 0.12, 48), new THREE.MeshStandardMaterial({ color: "#f8dccd", roughness: 1 }));
-  sand.position.y = SAND_Y - 0.06;
-  sand.receiveShadow = true;
-  g.add(sand);
-
-  // meadow: sage grass with a soft tint of the island colour
-  const grassR = radius * 0.84;
-  const grassGeo = new THREE.CylinderGeometry(grassR, grassR * 1.04, 0.24, 48, 1);
-  const grassCol = new THREE.Color("#7fcf8e").lerp(tint, 0.18);
-  vertexGradient(grassGeo, grassCol, grassCol.clone().multiplyScalar(0.82), -0.12, 0.12);
-  const grass = new THREE.Mesh(grassGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, emissive: grassCol, emissiveIntensity: 0.08 }));
-  grass.position.y = GRASS_Y - 0.12;
-  grass.receiveShadow = true;
-  g.add(grass);
-
-  // foam ring on the water
-  const foam = new THREE.Mesh(
-    new THREE.RingGeometry(radius * 0.95, radius * 1.28, 64),
-    new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: 0.28, depthWrite: false })
-  );
-  foam.rotation.x = -Math.PI / 2;
-  foam.position.y = 0.04;
-  foam.userData.foam = true;
-  g.add(foam);
-
-  // landmark: stone pedestal with a floating crystal in the island colour
-  const stone = new THREE.MeshStandardMaterial({ color: "#efe6f5", roughness: 0.7, flatShading: true });
-  const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.95, 0.5, 8), stone);
-  ped.position.y = GRASS_Y + 0.25;
-  ped.castShadow = ped.receiveShadow = true;
-  g.add(ped);
-  const ped2 = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.62, 0.3, 8), stone);
-  ped2.position.y = GRASS_Y + 0.65;
-  ped2.castShadow = true;
-  g.add(ped2);
-  const shapes: Record<string, THREE.BufferGeometry> = {
-    home: new THREE.OctahedronGeometry(0.55, 0),
-    about: new THREE.IcosahedronGeometry(0.5, 0),
-    work: new THREE.OctahedronGeometry(0.5, 0),
-    experience: new THREE.DodecahedronGeometry(0.5, 0),
-    skills: new THREE.TetrahedronGeometry(0.6, 0),
-    credentials: new THREE.OctahedronGeometry(0.52, 0),
-    contact: new THREE.TorusGeometry(0.42, 0.13, 12, 32),
-  };
-  const crystal = new THREE.Mesh(
-    shapes[kind] ?? new THREE.IcosahedronGeometry(0.5, 0),
-    new THREE.MeshPhysicalMaterial({ color: tint, emissive: tint, emissiveIntensity: 0.55, roughness: 0.12, metalness: 0.15, clearcoat: 1, flatShading: true })
-  );
-  if (kind === "work") crystal.scale.set(0.8, 1.35, 0.8);
-  crystal.position.y = GRASS_Y + 1.75;
-  crystal.castShadow = true;
-  g.add(crystal);
-  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: tint, transparent: true, opacity: 0.75, depthWrite: false, blending: THREE.AdditiveBlending }));
-  glow.scale.set(3.4, 3.4, 1);
-  glow.position.y = GRASS_Y + 1.75;
-  g.add(glow);
-
-  // trees, rocks and flowers, kept clear of the centre and the bridges
-  const okSpot = (a: number, d: number) => {
-    if (d < 1.9) return false;
-    return avoid.every((b) => Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b))) > 0.42 || d < 1.2);
-  };
-  const trunkMat = new THREE.MeshStandardMaterial({ color: "#8c6470", roughness: 0.9 });
-  const sakura = [new THREE.MeshStandardMaterial({ color: "#f7b8d3", roughness: 0.8, flatShading: true }), new THREE.MeshStandardMaterial({ color: "#f29dc4", roughness: 0.8, flatShading: true })];
-  const pine = [new THREE.MeshStandardMaterial({ color: "#8a9cf0", roughness: 0.85, flatShading: true }), new THREE.MeshStandardMaterial({ color: "#7486e3", roughness: 0.85, flatShading: true })];
-  const rockMat = new THREE.MeshStandardMaterial({ color: "#bcaecf", roughness: 0.9, flatShading: true });
-  const trees = 4 + Math.floor(radius * 0.8);
-  for (let n = 0, tries = 0; n < trees && tries < 80; tries++) {
-    const a = r() * Math.PI * 2;
-    const d = 1.9 + r() * (grassR - 2.4);
-    if (!okSpot(a, d)) continue;
-    n++;
-    const tx = Math.cos(a) * d;
-    const tz = Math.sin(a) * d;
-    const tree = new THREE.Group();
-    tree.position.set(tx, GRASS_Y, tz);
-    const sc = 0.75 + r() * 0.55;
-    tree.scale.setScalar(sc);
-    tree.rotation.y = r() * Math.PI;
-    if (r() < 0.55) {
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.17, 1.3, 7), trunkMat);
-      trunk.position.y = 0.65;
-      trunk.rotation.z = (r() - 0.5) * 0.2;
-      trunk.castShadow = true;
-      tree.add(trunk);
-      for (let k = 0; k < 4; k++) {
-        const b = new THREE.Mesh(new THREE.IcosahedronGeometry(0.42 + r() * 0.2, 1), sakura[k % 2]);
-        b.position.set((r() - 0.5) * 0.7, 1.45 + r() * 0.4, (r() - 0.5) * 0.7);
-        b.castShadow = true;
-        tree.add(b);
-      }
-    } else {
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.6, 6), trunkMat);
-      trunk.position.y = 0.3;
-      trunk.castShadow = true;
-      tree.add(trunk);
-      for (let k = 0; k < 3; k++) {
-        const c = new THREE.Mesh(new THREE.ConeGeometry(0.62 - k * 0.15, 0.85, 7), pine[k % 2]);
-        c.position.y = 0.75 + k * 0.45;
-        c.castShadow = true;
-        tree.add(c);
-      }
-    }
-    tree.userData.sway = r() * 6;
-    g.add(tree);
-  }
-  for (let k = 0; k < 4; k++) {
-    const a = r() * Math.PI * 2;
-    const d = grassR + (radius - grassR) * 0.5;
-    if (!okSpot(a, d)) continue;
-    const rk = new THREE.Mesh(new THREE.DodecahedronGeometry(0.22 + r() * 0.25, 0), rockMat);
-    rk.position.set(Math.cos(a) * d, SAND_Y + 0.08, Math.sin(a) * d);
-    rk.rotation.set(r() * 3, r() * 3, r() * 3);
-    rk.castShadow = rk.receiveShadow = true;
-    g.add(rk);
-  }
-  const flowerCols = ["#ffffff", "#ffd1e6", "#c9d6ff", "#ffe9a8", "#e8c8f5"];
-  const flowerGeo = new THREE.SphereGeometry(0.07, 6, 4);
-  const flowers = new THREE.InstancedMesh(flowerGeo, new THREE.MeshStandardMaterial({ roughness: 0.6 }), 40);
-  const m4 = new THREE.Matrix4();
-  for (let k = 0; k < 40; k++) {
-    const a = r() * Math.PI * 2;
-    const d = 1.3 + r() * (grassR - 1.5);
-    m4.makeTranslation(Math.cos(a) * d, GRASS_Y + 0.05, Math.sin(a) * d);
-    flowers.setMatrixAt(k, m4);
-    flowers.setColorAt(k, new THREE.Color(flowerCols[k % flowerCols.length]));
-  }
-  g.add(flowers);
-
-  return { x, z, r: radius, color: tint, crystal, glow };
-}
-
-function buildBridge(scene: THREE.Scene, b: Bridge) {
-  const dx = b.bx - b.ax;
-  const dz = b.bz - b.az;
-  const len = Math.hypot(dx, dz);
-  const ang = Math.atan2(dx, dz);
-  const g = new THREE.Group();
-  g.position.set(b.ax, 0, b.az);
-  g.rotation.y = ang;
-  scene.add(g);
-  const wood = [new THREE.MeshStandardMaterial({ color: "#c2917e", roughness: 0.9 }), new THREE.MeshStandardMaterial({ color: "#b07f70", roughness: 0.9 })];
-  const n = Math.ceil(len / 0.42);
-  for (let i = 0; i <= n; i++) {
-    const t = i / n;
-    const p = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.09, 0.34), wood[i % 2]);
-    p.position.set(0, bridgeY(t) - 0.05, t * len);
-    p.rotation.x = -Math.cos(t * Math.PI) * 0.12;
-    p.castShadow = p.receiveShadow = true;
-    g.add(p);
-  }
-  // rope posts and ropes
-  const postMat = new THREE.MeshStandardMaterial({ color: "#8c6470", roughness: 0.9 });
-  const ropeMat = new THREE.LineBasicMaterial({ color: "#f3dfe9" });
-  for (const sx of [-0.85, 0.85]) {
-    const pts: THREE.Vector3[] = [];
-    for (let i = 0; i <= 3; i++) {
-      const t = i / 3;
-      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.75, 6), postMat);
-      post.position.set(sx, bridgeY(t) + 0.3, t * len);
-      post.castShadow = true;
-      g.add(post);
-    }
-    for (let i = 0; i <= 24; i++) {
-      const t = i / 24;
-      pts.push(new THREE.Vector3(sx, bridgeY(t) + 0.62 - Math.sin(((t * 3) % 1) * Math.PI) * 0.12, t * len));
-    }
-    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), ropeMat));
-  }
-}
-
-function bridgeY(t: number) {
-  return SAND_Y + 0.1 + Math.sin(t * Math.PI) * 0.35;
-}
-
-/* =====================================================================
  * World
  * ===================================================================== */
 export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): WorldApi {
@@ -552,126 +299,116 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.NeutralToneMapping; // keeps pastel colours saturated
-  renderer.toneMappingExposure = opts.dark ? 0.95 : 1.05;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = opts.dark ? 0.95 : 0.9;
+  const small = Math.min(window.innerWidth, window.innerHeight) < 700;
 
   const scene = new THREE.Scene();
-  const sky = opts.dark
-    ? gradientTexture([
-        [0, "#1b1846"],
-        [0.45, "#4d3470"],
-        [0.75, "#a0609a"],
-        [1, "#e7a3c4"],
-      ])
-    : gradientTexture([
-        [0, "#86a7ff"],
-        [0.45, "#b9a9ec"],
-        [0.75, "#efb5d6"],
-        [1, "#ffd9e8"],
-      ]);
-  scene.background = sky;
-  // soft studio reflections so gold, crystals and fur catch the light
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.environment = envTex;
-  scene.environmentIntensity = opts.dark ? 0.45 : 0.6;
-  pmrem.dispose();
-  scene.fog = new THREE.Fog(opts.dark ? "#6a4683" : "#efc0dc", 45, 150);
+  const { env, sunDir } = buildSky(scene, renderer, opts.dark);
+  scene.fog = new THREE.Fog(opts.dark ? "#3d3556" : "#d9c2c4", 70, 300);
 
-  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 400);
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 12000);
 
-  // light: soft sky/ground fill plus a warm sun that casts shadows near the cat
-  scene.add(new THREE.HemisphereLight(opts.dark ? "#d4dbff" : "#e3e9ff", opts.dark ? "#8a6a90" : "#ffd3e4", opts.dark ? 0.85 : 1.0));
-  const sun = new THREE.DirectionalLight(opts.dark ? "#ffe0f0" : "#fff4f2", opts.dark ? 2.1 : 2.6);
+  // light: sky fill plus a low golden sun that casts shadows near the cat
+  scene.add(new THREE.HemisphereLight(opts.dark ? "#a3a8f0" : "#a9c8ff", opts.dark ? "#4a3a55" : "#6e5c45", opts.dark ? 1.15 : 1.1));
+  const sun = new THREE.DirectionalLight(opts.dark ? "#ffad94" : "#ffd6ae", opts.dark ? 2.6 : 3.6);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
-  sun.shadow.camera.left = sun.shadow.camera.bottom = -22;
-  sun.shadow.camera.right = sun.shadow.camera.top = 22;
+  sun.shadow.mapSize.set(small ? 1024 : 2048, small ? 1024 : 2048);
+  sun.shadow.camera.left = sun.shadow.camera.bottom = -20;
+  sun.shadow.camera.right = sun.shadow.camera.top = 20;
   sun.shadow.camera.near = 1;
-  sun.shadow.camera.far = 90;
-  sun.shadow.bias = -0.0005;
-  sun.shadow.normalBias = 0.03;
+  sun.shadow.camera.far = 120;
+  sun.shadow.bias = -0.0004;
+  sun.shadow.normalBias = 0.04;
   scene.add(sun, sun.target);
+  // keep the sun low (long evening shadows) but high enough to light the islands
+  const sunOffset = new THREE.Vector3(sunDir.x, Math.max(sunDir.y, 0.32), sunDir.z).normalize().multiplyScalar(45);
 
   /* ocean */
-  const oceanGeo = new THREE.PlaneGeometry(360, 360, 150, 150);
-  oceanGeo.rotateX(-Math.PI / 2);
-  const oceanBase = Float32Array.from((oceanGeo.attributes.position as THREE.BufferAttribute).array as Float32Array);
-  const ocean = new THREE.Mesh(
-    oceanGeo,
-    new THREE.MeshStandardMaterial({ color: opts.dark ? "#6f7fe0" : "#93abfc", roughness: 0.22, metalness: 0.05, flatShading: true, transparent: true, opacity: 0.93 })
-  );
-  ocean.receiveShadow = true;
-  ocean.userData.ocean = true;
-  scene.add(ocean);
+  const ocean = buildWater(scene, sunDir, opts.dark, small);
 
-  /* islands along a gentle zig-zag */
+  /* islands along a gentle zig-zag, each with its own coastline */
   const glowTex = glowTexture();
+  const detailTex = groundDetailTexture();
+  const woodTex = woodTexture();
   const N = opts.islands.length;
-  const centers = opts.islands.map((isl, i) => ({
-    x: i * 15 - ((N - 1) * 15) / 2,
-    z: (i % 2 === 0 ? -1 : 1) * 4.8 + Math.sin(i * 1.7) * 1.6,
-    r: isl.kind === "home" ? 6.4 : 5.4,
-  }));
+  const shapes: Shape[] = opts.islands.map((isl, i) => {
+    const r = rng(i * 977 + 5);
+    return {
+      x: i * 15 - ((N - 1) * 15) / 2,
+      z: (i % 2 === 0 ? -1 : 1) * 4.8 + Math.sin(i * 1.7) * 1.6,
+      r: isl.kind === "home" ? 6.6 : 5.6,
+      seed: i * 13.37 + 2,
+      p1: r() * 6.28,
+      p2: r() * 6.28,
+    };
+  });
+  const centers = shapes;
   const bridges: Bridge[] = [];
   for (let i = 0; i < N - 1; i++) {
-    const a = centers[i];
-    const b = centers[i + 1];
+    const a = shapes[i];
+    const b = shapes[i + 1];
     const d = Math.hypot(b.x - a.x, b.z - a.z);
     const ux = (b.x - a.x) / d;
     const uz = (b.z - a.z) / d;
-    bridges.push({ ax: a.x + ux * (a.r - 0.7), az: a.z + uz * (a.r - 0.7), bx: b.x - ux * (b.r - 0.7), bz: b.z - uz * (b.r - 0.7), half: 0.72 });
+    const ra = shapeR(a, Math.atan2(uz, ux)) * 0.82;
+    const rb = shapeR(b, Math.atan2(-uz, -ux)) * 0.82;
+    bridges.push({ ax: a.x + ux * ra, az: a.z + uz * ra, bx: b.x - ux * rb, bz: b.z - uz * rb, half: 0.72 });
   }
-  const islands: IslandGeo[] = opts.islands.map((isl, i) => {
-    const c = centers[i];
-    const avoid: number[] = [];
-    if (i > 0) avoid.push(Math.atan2(centers[i - 1].z - c.z, centers[i - 1].x - c.x));
-    if (i < N - 1) avoid.push(Math.atan2(centers[i + 1].z - c.z, centers[i + 1].x - c.x));
-    return buildIsland(scene, c.x, c.z, c.r, isl.kind, i * 131 + 17, glowTex, avoid);
+  const crystalGeos: Record<string, () => THREE.BufferGeometry> = {
+    home: () => new THREE.OctahedronGeometry(0.55, 0),
+    about: () => new THREE.IcosahedronGeometry(0.5, 0),
+    work: () => new THREE.OctahedronGeometry(0.5, 0).scale(0.8, 1.35, 0.8),
+    experience: () => new THREE.DodecahedronGeometry(0.5, 0),
+    skills: () => new THREE.TetrahedronGeometry(0.6, 0),
+    credentials: () => new THREE.OctahedronGeometry(0.52, 0),
+    contact: () => new THREE.TorusGeometry(0.42, 0.13, 12, 32),
+  };
+  const obstacles: Obstacle[] = [];
+  const islands = opts.islands.map((isl, i) => {
+    const anchors: { x: number; z: number }[] = [];
+    if (i > 0) anchors.push({ x: bridges[i - 1].bx, z: bridges[i - 1].bz });
+    if (i < N - 1) anchors.push({ x: bridges[i].ax, z: bridges[i].az });
+    const built = buildIsland(
+      scene,
+      shapes[i],
+      KIND_COLOR[isl.kind] ?? KIND_COLOR.custom,
+      (crystalGeos[isl.kind] ?? (() => new THREE.IcosahedronGeometry(0.5, 0)))(),
+      glowTex,
+      detailTex,
+      anchors,
+      opts.dark
+    );
+    obstacles.push(...built.obstacles);
+    return built;
   });
-  bridges.forEach((b) => buildBridge(scene, b));
+  bridges.forEach((b) => buildBridge(scene, b, woodTex));
 
   /* clouds */
-  const cloudMat = new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 1, transparent: true, opacity: opts.dark ? 0.55 : 0.92 });
-  const clouds: THREE.Group[] = [];
-  const cr = rng(99);
-  for (let i = 0; i < 12; i++) {
-    const c = new THREE.Group();
-    for (let k = 0; k < 5; k++) {
-      const s = new THREE.Mesh(new THREE.IcosahedronGeometry(1.4 + cr() * 1.4, 1), cloudMat);
-      s.position.set(k * 1.6 - 3.2 + cr(), cr() * 0.8, cr() * 1.5);
-      s.scale.y = 0.6;
-      c.add(s);
-    }
-    c.position.set((cr() - 0.5) * 220, 16 + cr() * 12, -40 - cr() * 60);
-    c.userData.speed = 0.4 + cr() * 0.8;
-    scene.add(c);
-    clouds.push(c);
-  }
+  const clouds = buildClouds(scene, opts.dark);
 
-  /* floating sparkles */
-  const SP = 260;
+  /* fireflies at dusk */
+  const SP = opts.dark ? 220 : 0;
   const spPos = new Float32Array(SP * 3);
-  const spCol = new Float32Array(SP * 3);
   const spBase: number[] = [];
-  const pal = ["#ffd1e6", "#c9d6ff", "#e8c8f5", "#ffffff"].map((c) => new THREE.Color(c));
+  const cr = rng(42);
   for (let i = 0; i < SP; i++) {
-    const x = (cr() - 0.5) * (N * 15 + 30);
-    const y = 0.8 + cr() * 7;
-    const z = (cr() - 0.5) * 40;
+    const s = shapes[i % N];
+    const a = cr() * Math.PI * 2;
+    const d = cr() * s.r * 0.8;
+    const x = s.x + Math.cos(a) * d;
+    const z = s.z + Math.sin(a) * d;
+    const y = 0.9 + cr() * 2.6;
     spPos.set([x, y, z], i * 3);
     spBase.push(x, y, z, cr() * 6);
-    const col = pal[i % pal.length];
-    spCol.set([col.r, col.g, col.b], i * 3);
   }
   const spGeo = new THREE.BufferGeometry();
   spGeo.setAttribute("position", new THREE.BufferAttribute(spPos, 3));
-  spGeo.setAttribute("color", new THREE.BufferAttribute(spCol, 3));
   const sparkles = new THREE.Points(
     spGeo,
-    new THREE.PointsMaterial({ size: 0.16, map: glowTex, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.9 })
+    new THREE.PointsMaterial({ size: 0.22, map: glowTex, color: "#f6ff9a", transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.95 })
   );
-  scene.add(sparkles);
+  if (SP) scene.add(sparkles);
 
   /* coins */
   type CoinObj = { id: string; mesh: THREE.Mesh; x: number; z: number; y: number; got: boolean; fly: number };
@@ -684,24 +421,33 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
   opts.islands.forEach((isl, i) => {
     const c = centers[i];
     for (let j = 0; j < per; j++) {
-      const a = (j / per) * Math.PI * 2 + i * 0.7;
-      const d = c.r * 0.55;
+      // a free spot on the meadow, not inside a tree
+      let a = (j / per) * Math.PI * 2 + i * 0.7;
+      let d = c.r * 0.52;
+      for (let k = 0; k < 12; k++) {
+        const tx = c.x + Math.cos(a) * d;
+        const tz = c.z + Math.sin(a) * d;
+        if (obstacles.every((o) => Math.hypot(o.x - tx, o.z - tz) > o.r + 0.5)) break;
+        a += 0.21;
+        d = c.r * (0.4 + (k % 3) * 0.08);
+      }
       const id = `${isl.id}-${j}`;
       const mesh = new THREE.Mesh(coinGeo, coinMat);
       const x = c.x + Math.cos(a) * d;
       const z = c.z + Math.sin(a) * d;
-      mesh.position.set(x, GRASS_Y + 0.6, z);
+      const y = Math.max(0.3, islandHeight(c, x, z)) + 0.6;
+      mesh.position.set(x, y, z);
       mesh.castShadow = true;
       mesh.visible = !collected.has(id);
       scene.add(mesh);
-      coins.push({ id, mesh, x, z, y: GRASS_Y + 0.6, got: collected.has(id), fly: -1 });
+      coins.push({ id, mesh, x, z, y, got: collected.has(id), fly: -1 });
     }
   });
 
   /* cat */
   const cat = buildCat();
   scene.add(cat.root);
-  const pos = new THREE.Vector3(centers[0].x, GRASS_Y, centers[0].z + 2.6);
+  const pos = new THREE.Vector3(centers[0].x, PLATEAU, centers[0].z + 2.6);
   let heading = Math.PI; // facing the camera at first
   let speed = 0;
   let turnRate = 0;
@@ -719,34 +465,36 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
   const islandAt = (x: number, z: number, margin = 0.35) => {
     for (let i = 0; i < N; i++) {
       const c = centers[i];
-      if (Math.hypot(x - c.x, z - c.z) < c.r - margin) return i;
+      const dx = x - c.x;
+      const dz = z - c.z;
+      if (Math.hypot(dx, dz) < shapeR(c, Math.atan2(dz, dx)) * SHORE - margin) return i;
     }
     return -1;
   };
   const walkable = (x: number, z: number) => {
+    let ok = false;
     for (let i = 0; i < N; i++) {
       const c = centers[i];
       const d = Math.hypot(x - c.x, z - c.z);
+      if (d > c.r * 1.3) continue;
       if (d < 1.15) return false; // the pedestal
-      if (d < c.r - 0.45) return true;
+      if (islandHeight(c, x, z) > 0.12) ok = true;
     }
-    return bridges.some((b) => segDist(x, z, b).d < b.half);
+    if (!ok) ok = bridges.some((b) => segDist(x, z, b).d < b.half);
+    if (!ok) return false;
+    return obstacles.every((o) => Math.hypot(o.x - x, o.z - z) > o.r);
   };
   const groundY = (x: number, z: number) => {
-    let y = -1;
+    let y = -9;
     for (let i = 0; i < N; i++) {
       const c = centers[i];
-      const d = Math.hypot(x - c.x, z - c.z);
-      if (d < c.r) {
-        const gr = c.r * 0.84;
-        y = Math.max(y, d < gr - 0.3 ? GRASS_Y : d < gr + 0.2 ? THREE.MathUtils.lerp(GRASS_Y, SAND_Y, (d - gr + 0.3) / 0.5) : SAND_Y);
-      }
+      if (Math.hypot(x - c.x, z - c.z) < c.r * 1.3) y = Math.max(y, islandHeight(c, x, z));
     }
     for (const b of bridges) {
       const s = segDist(x, z, b);
       if (s.d < b.half + 0.2) y = Math.max(y, bridgeY(s.t) + 0.02);
     }
-    return y < 0 ? SAND_Y : y;
+    return Math.max(0.05, y);
   };
 
   /* ---------- path planning: islands form a chain joined by bridges ---------- */
@@ -764,27 +512,30 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     });
     return best;
   };
-  /** Add a waypoint, stepping around the pedestal in the middle of an island. */
+  /** Add a waypoint, stepping around pedestals, trees and big rocks on the way. */
+  const blockers: Obstacle[] = [...centers.map((c) => ({ x: c.x, z: c.z, r: 1.15 })), ...obstacles];
   const pushAround = (list: THREE.Vector2[], from: THREE.Vector2, to: THREE.Vector2) => {
-    for (const c of centers) {
-      const vx = to.x - from.x;
-      const vz = to.y - from.y;
-      const l2 = vx * vx + vz * vz || 1;
-      const t = THREE.MathUtils.clamp(((c.x - from.x) * vx + (c.z - from.y) * vz) / l2, 0, 1);
+    const vx = to.x - from.x;
+    const vz = to.y - from.y;
+    const l2 = vx * vx + vz * vz || 1;
+    const l = Math.sqrt(l2);
+    const hits: { t: number; p: THREE.Vector2 }[] = [];
+    for (const o of blockers) {
+      const t = ((o.x - from.x) * vx + (o.z - from.y) * vz) / l2;
+      if (t <= 0.02 || t >= 0.98) continue;
       const px = from.x + vx * t;
       const pz = from.y + vz * t;
-      const d = Math.hypot(px - c.x, pz - c.z);
-      if (d < 1.6 && t > 0.02 && t < 0.98) {
-        const l = Math.sqrt(l2);
-        let nx = -vz / l;
-        let nz = vx / l;
-        if ((px - c.x) * nx + (pz - c.z) * nz < 0) {
-          nx = -nx;
-          nz = -nz;
-        }
-        list.push(new THREE.Vector2(c.x + nx * 2.1, c.z + nz * 2.1));
+      if (Math.hypot(px - o.x, pz - o.z) >= o.r + 0.35) continue;
+      let nx = -vz / l;
+      let nz = vx / l;
+      if ((px - o.x) * nx + (pz - o.z) * nz < 0) {
+        nx = -nx;
+        nz = -nz;
       }
+      const k = o.r + (o.r > 1 ? 0.95 : 0.55);
+      hits.push({ t, p: new THREE.Vector2(o.x + nx * k, o.z + nz * k) });
     }
+    hits.sort((a, b) => a.t - b.t).forEach((h) => list.push(h.p));
     list.push(to);
   };
   const planTo = (goal: THREE.Vector2, goalIsland: number) => {
@@ -1067,37 +818,33 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     }
 
     /* scenery motion */
-    const arr = (oceanGeo.attributes.position as THREE.BufferAttribute).array as Float32Array;
-    for (let i = 0; i < arr.length; i += 3) {
-      const x = oceanBase[i];
-      const z = oceanBase[i + 2];
-      arr[i + 1] = Math.sin(x * 0.16 + t * 0.9) * 0.22 + Math.cos(z * 0.21 + t * 1.15) * 0.18 + Math.sin((x + z) * 0.4 + t * 1.7) * 0.06 - 0.12;
-    }
-    (oceanGeo.attributes.position as THREE.BufferAttribute).needsUpdate = true;
+    ocean.material.uniforms.time.value += dt * 0.55;
+    wind.value = t;
     islands.forEach((isl, i) => {
       isl.crystal.rotation.y = t * 0.8 + i;
-      isl.crystal.position.y = GRASS_Y + 1.75 + Math.sin(t * 1.6 + i) * 0.15;
+      isl.crystal.position.y = PLATEAU + 1.75 + Math.sin(t * 1.6 + i) * 0.15;
       isl.glow.position.y = isl.crystal.position.y;
       const near = lastIsland === i;
       const gm = isl.glow.material as THREE.SpriteMaterial;
-      gm.opacity += ((near ? 1 : 0.55) - gm.opacity) * Math.min(1, dt * 3);
-      const gs = (near ? 4.2 : 3.2) + Math.sin(t * 2 + i) * 0.2;
+      gm.opacity += ((near ? 0.95 : opts.dark ? 0.6 : 0.35) - gm.opacity) * Math.min(1, dt * 3);
+      const gs = (near ? 3.8 : 2.8) + Math.sin(t * 2 + i) * 0.2;
       isl.glow.scale.set(gs, gs, 1);
-    });
-    scene.traverse((o) => {
-      if (o.userData.foam) o.scale.setScalar(1 + Math.sin(t * 1.2 + o.parent!.position.x) * 0.025);
-      else if (o.userData.sway !== undefined) o.rotation.z = Math.sin(t * 1.1 + o.userData.sway) * 0.025;
+      const fm = isl.foam.material as THREE.MeshBasicMaterial;
+      fm.opacity = 0.65 + Math.sin(t * 1.3 + i) * 0.3;
     });
     clouds.forEach((c) => {
       c.position.x += c.userData.speed * dt;
-      if (c.position.x > 130) c.position.x = -130;
+      if (c.position.x > 380) c.position.x = -380;
     });
-    const sp = spGeo.attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < SP; i++) {
-      sp.setY(i, spBase[i * 4 + 1] + Math.sin(t * 0.6 + spBase[i * 4 + 3]) * 0.6);
-      sp.setX(i, spBase[i * 4] + Math.sin(t * 0.3 + spBase[i * 4 + 3]) * 0.4);
+    if (SP) {
+      const sp = spGeo.attributes.position as THREE.BufferAttribute;
+      for (let i = 0; i < SP; i++) {
+        const ph = spBase[i * 4 + 3];
+        sp.setXYZ(i, spBase[i * 4] + Math.sin(t * 0.4 + ph) * 0.6, spBase[i * 4 + 1] + Math.sin(t * 0.7 + ph * 2) * 0.4, spBase[i * 4 + 2] + Math.cos(t * 0.35 + ph) * 0.6);
+      }
+      sp.needsUpdate = true;
+      (sparkles.material as THREE.PointsMaterial).opacity = 0.6 + Math.sin(t * 3) * 0.3;
     }
-    sp.needsUpdate = true;
 
     /* camera: cinematic fly-in, then a smooth third-person follow */
     introT = Math.min(1, (performance.now() - started) / 2800);
@@ -1109,7 +856,7 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
     camLook.lerp(tmp.set(pos.x, pos.y + 0.9, pos.z), Math.min(1, dt * (introT >= 1 ? 5 : 2)));
     camera.lookAt(camLook);
 
-    sun.position.set(pos.x + 14, 26, pos.z + 10);
+    sun.position.set(pos.x + sunOffset.x, sunOffset.y, pos.z + sunOffset.z);
     sun.target.position.set(pos.x, 0, pos.z);
 
     /* overlays */
@@ -1173,8 +920,9 @@ export function createWorld(canvas: HTMLCanvasElement, opts: WorldOptions): Worl
           mat.dispose();
         });
       });
-      sky.dispose();
-      envTex.dispose();
+      env.dispose();
+      detailTex.dispose();
+      woodTex.dispose();
       glowTex.dispose();
       renderer.dispose();
     },
